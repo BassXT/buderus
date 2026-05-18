@@ -2,6 +2,8 @@
 
 Experimental Home Assistant custom integration for Buderus/Bosch systems exposed through an MX300/K30 gateway and the MyBuderus PointT API.
 
+[![Open your Home Assistant instance and open this repository inside HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=BassXT&repository=buderus&category=integration)
+
 ## Disclaimer
 
 This is an unofficial community project. It is not affiliated with, endorsed by, or supported by Buderus, Bosch, Bosch Thermotechnology, SingleKey ID, or Home Assistant.
@@ -41,6 +43,19 @@ Confirmed read resources from the first MX300/K30 capture:
 - `/notifications`
 
 ## Installation
+
+### HACS
+
+1. Make sure HACS is installed and configured in Home Assistant.
+2. Click the HACS button above.
+3. If the button does not work, open HACS manually, open the three-dot menu, select `Custom repositories`, add `https://github.com/BassXT/buderus`, and choose `Integration` as the category.
+4. Download the `Buderus MX300` repository in HACS.
+5. Restart Home Assistant.
+6. Go to Settings -> Devices & services -> Add integration.
+7. Search for `Buderus MX300`.
+8. Follow the setup form.
+
+### Manual
 
 1. Copy `custom_components/buderus_ha` to your Home Assistant `custom_components` directory.
 2. Restart Home Assistant.
