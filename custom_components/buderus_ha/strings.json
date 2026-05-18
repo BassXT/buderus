@@ -1,0 +1,80 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Buderus MX300",
+        "description": "Warning: Initial setup currently only works reliably in a desktop browser. On iPhone or Android, the installed MyBuderus app can intercept the final `com.buderus.tt.dashtt://app/login` redirect, so Home Assistant cannot receive the authorization code.\n\nRecommended on Windows: run `tools/register_windows_oauth_redirect_helper.ps1` once before setup. Then open this SingleKey login URL on the PC. When the browser asks to open the external app after login, allow it. The final redirect URL is copied to the clipboard; paste it here.\n\nFallback: open browser developer tools before login, go to Network, enable Preserve log, and copy the `Location` header from the last `/auth/connect/authorize/callback` redirect.\n\n{authorization_url}",
+        "data": {
+          "redirect_url": "Redirect URL or authorization code",
+          "gateway_id": "Gateway ID"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to the Buderus/Bosch PointT API.",
+      "invalid_auth": "Could not complete the SingleKey login."
+    },
+    "abort": {
+      "already_configured": "This gateway is already configured."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "actual_supply_temperature": { "name": "Supply temperature" },
+      "return_temperature": { "name": "Return temperature" },
+      "outdoor_temperature": { "name": "Outdoor temperature" },
+      "central_heating_status": { "name": "Central heating status", "state": { "off": "Off", "on": "On" } },
+      "heating_circuit_operation_mode": { "name": "Heating circuit operation mode", "state": { "auto": "Auto", "manual": "Manual" } },
+      "heating_circuit_overall_status": { "name": "Heating circuit overall status", "state": { "ch_enabled": "Heating enabled", "ch_disabled": "Heating disabled" } },
+      "heating_circuit_active_switch_program": { "name": "Heating circuit active switch program" },
+      "heating_circuit_current_room_setpoint": { "name": "Heating circuit current room setpoint" },
+      "heating_circuit_manual_room_setpoint": { "name": "Heating circuit manual room setpoint" },
+      "heating_circuit_summer_winter_mode": { "name": "Heating circuit summer/winter mode", "state": { "forced": "Forced", "off": "Off", "cooling": "Cooling" } },
+      "heating_circuit_heat_cool_mode": { "name": "Heating circuit heat/cool mode", "state": { "cool": "Cool", "heat": "Heat", "heatCool": "Heat/cool" } },
+      "heating_circuit_room_temperature": { "name": "Heating circuit room temperature" },
+      "heating_circuit_max_flow_temperature": { "name": "Heating circuit max flow temperature" },
+      "heating_circuit_summer_winter_switch_mode": { "name": "Heating circuit summer/winter switch mode", "state": { "automatic": "Automatic", "forced": "Forced", "off": "Off" } },
+      "heating_circuit_summer_winter_threshold": { "name": "Heating circuit summer/winter threshold" },
+      "dhw_actual_temperature": { "name": "DHW actual temperature" },
+      "dhw_current_setpoint": { "name": "DHW target temperature" },
+      "dhw_operation_mode": { "name": "DHW operation mode", "state": { "Off": "Off", "eco": "Eco", "high": "Comfort", "low": "Eco+", "ownprogram": "Auto" } },
+      "dhw_overall_status": { "name": "DHW overall status", "state": { "dhw_enabled": "DHW enabled", "dhw_disabled": "DHW disabled" } },
+      "dhw_charge": { "name": "Extra hot water", "state": { "start": "Active", "stop": "Inactive" } },
+      "dhw_charge_duration": { "name": "Extra hot water duration" },
+      "dhw_single_charge_setpoint": { "name": "Extra hot water target temperature" },
+      "dhw_reduce_temperature_on_alarm": { "name": "DHW reduce temperature on alarm", "state": { "off": "Off", "on": "On" } },
+      "dhw_thermal_disinfection_mode": { "name": "DHW thermal disinfection mode", "state": { "off": "Off", "on": "On" } },
+      "actual_heat_demand": { "name": "Actual heat demand", "state": { "ch": "Heating", "ch, dhw": "Heating and DHW", "ch, dhw, frost": "Heating, DHW and frost protection", "ch, frost": "Heating and frost protection", "dhw": "DHW", "dhw, frost": "DHW and frost protection", "frost": "Frost protection", "none": "None" } },
+      "actual_modulation": { "name": "Actual modulation" },
+      "compressor_status": { "name": "Compressor status", "state": { "alarm": "Alarm", "cooling": "Cooling", "defrost": "Defrost", "dhw": "DHW", "heating": "Heating", "off": "Off", "pool": "Pool", "pool_heat": "Pool heating" } },
+      "electric_heater_status": { "name": "Electric heater status", "state": { "alarm": "Alarm", "dhw": "DHW", "heating": "Heating", "off": "Off", "pool": "Pool", "pool_heat": "Pool heating" } },
+      "number_of_starts": { "name": "Number of starts" },
+      "number_of_starts_heating": { "name": "Number of starts heating" },
+      "number_of_starts_dhw": { "name": "Number of starts DHW" },
+      "number_of_starts_cooling": { "name": "Number of starts cooling" },
+      "total_system_working_time": { "name": "Total system working time" },
+      "notification_count": { "name": "Notification count" },
+      "heat_pump_type": { "name": "Heat pump type", "state": { "air_water": "Air/water", "exhaustAir_water": "Exhaust air/water", "liquid_water": "Brine/water" } },
+      "heat_source_type": { "name": "Heat source type", "state": { "GasBoiler": "Gas boiler", "Heatpump": "Heat pump", "No_Appliance": "No appliance", "OilBoiler": "Oil boiler", "eBoiler": "Electric boiler", "unknownBoiler": "Unknown boiler" } },
+      "heating_circuit_heating_type": { "name": "Heating circuit heating type", "state": { "convector": "Convector", "floor": "Floor heating", "radiator": "Radiator" } },
+      "heating_circuit_control_type": { "name": "Heating circuit control type", "state": { "wdcoptimized": "Weather compensated optimized", "wdcsimplified": "Weather compensated simplified" } },
+      "heating_circuit_switch_program_mode": { "name": "Heating circuit switch program mode", "state": { "free": "Free", "level": "Temperature level" } },
+      "gateway_data_processing_status": { "name": "Gateway data processing status", "state": { "completed": "Completed", "in_progress": "In progress" } },
+      "gateway_timezone": { "name": "Gateway timezone" },
+      "system_brand": { "name": "System brand" },
+      "system_bus": { "name": "System bus", "state": { "Detecting": "Detecting", "EMS2_0": "EMS2", "No_Bus": "No bus" } },
+      "system_country": { "name": "System country" },
+      "global_season_optimizer_mode": { "name": "Global season optimizer mode", "state": { "cooling": "Cooling", "heating": "Heating", "off": "Off" } },
+      "isrc_support_status": { "name": "iSRC support status", "state": { "IN_EVALUATION": "In evaluation", "NOT_SUPPORTED_INCOMPATIBLE_CONTROLLER": "Not supported: incompatible controller", "NOT_SUPPORTED_PAIRING_ENABLED": "Not supported: pairing enabled", "SUPPORTED": "Supported" } }
+    },
+    "number": {
+      "heating_circuit_manual_room_setpoint": { "name": "Heating circuit manual room setpoint" },
+      "dhw_charge_duration": { "name": "Extra hot water duration" },
+      "dhw_single_charge_setpoint": { "name": "Extra hot water target temperature" }
+    },
+    "switch": {
+      "dhw_charge": { "name": "Extra hot water" },
+      "dhw_reduce_temperature_on_alarm": { "name": "DHW temperature reduction on alarm" }
+    }
+  }
+}

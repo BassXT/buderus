@@ -1,0 +1,10 @@
+{
+  "domain": "buderus_ha",
+  "name": "Buderus MX300",
+  "codeowners": [],
+  "config_flow": true,
+  "documentation": "https://github.com/local/buderus_ha",
+  "iot_class": "cloud_polling",
+  "requirements": [],
+  "version": "0.1.0"
+}

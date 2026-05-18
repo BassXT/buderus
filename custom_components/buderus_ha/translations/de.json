@@ -1,0 +1,80 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Buderus MX300",
+        "description": "Warnung: Die Ersteinrichtung funktioniert aktuell nur zuverlässig in einem Desktop-Browser. Auf iPhone oder Android kann die installierte MyBuderus-App den finalen Redirect `com.buderus.tt.dashtt://app/login` abfangen, sodass Home Assistant den Autorisierungscode nicht erhält.\n\nEmpfohlen unter Windows: vor der Einrichtung einmal `tools/register_windows_oauth_redirect_helper.ps1` ausführen. Öffne dann diese SingleKey-Login-URL am PC. Wenn der Browser nach dem Login fragt, ob die externe App geöffnet werden soll, erlaube es. Die finale Redirect-URL wird in die Zwischenablage kopiert; füge sie hier ein.\n\nFallback: Öffne vor dem Login die Browser-Entwicklertools, wechsle zu Netzwerk, aktiviere Protokoll beibehalten und kopiere den `Location` Header aus dem letzten `/auth/connect/authorize/callback` Redirect.\n\n{authorization_url}",
+        "data": {
+          "redirect_url": "Redirect-URL oder Autorisierungscode",
+          "gateway_id": "Gateway-ID"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung zur Buderus/Bosch PointT API fehlgeschlagen.",
+      "invalid_auth": "SingleKey-Login konnte nicht abgeschlossen werden."
+    },
+    "abort": {
+      "already_configured": "Dieses Gateway ist bereits eingerichtet."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "actual_supply_temperature": { "name": "Vorlauftemperatur" },
+      "return_temperature": { "name": "Rücklauftemperatur" },
+      "outdoor_temperature": { "name": "Außentemperatur" },
+      "central_heating_status": { "name": "Heizbetrieb", "state": { "off": "Aus", "on": "Ein" } },
+      "heating_circuit_operation_mode": { "name": "Heizkreis Betriebsart", "state": { "auto": "Auto", "manual": "Manuell" } },
+      "heating_circuit_overall_status": { "name": "Heizkreis Gesamtstatus", "state": { "ch_enabled": "Heizen aktiviert", "ch_disabled": "Heizen deaktiviert" } },
+      "heating_circuit_active_switch_program": { "name": "Heizkreis aktives Schaltprogramm" },
+      "heating_circuit_current_room_setpoint": { "name": "Heizkreis aktueller Raumsollwert" },
+      "heating_circuit_manual_room_setpoint": { "name": "Heizkreis manueller Raumsollwert" },
+      "heating_circuit_summer_winter_mode": { "name": "Heizkreis Sommer-/Winterbetrieb", "state": { "forced": "Erzwungen", "off": "Aus", "cooling": "Kühlen" } },
+      "heating_circuit_heat_cool_mode": { "name": "Heizkreis Heiz-/Kühlmodus", "state": { "cool": "Kühlen", "heat": "Heizen", "heatCool": "Heizen/Kühlen" } },
+      "heating_circuit_room_temperature": { "name": "Heizkreis Raumtemperatur" },
+      "heating_circuit_max_flow_temperature": { "name": "Heizkreis maximale Vorlauftemperatur" },
+      "heating_circuit_summer_winter_switch_mode": { "name": "Heizkreis Sommer-/Winter-Umschaltung", "state": { "automatic": "Automatisch", "forced": "Erzwungen", "off": "Aus" } },
+      "heating_circuit_summer_winter_threshold": { "name": "Heizkreis Sommer-/Winter-Schwelle" },
+      "dhw_actual_temperature": { "name": "Warmwasser Ist-Temperatur" },
+      "dhw_current_setpoint": { "name": "Warmwasser Solltemperatur" },
+      "dhw_operation_mode": { "name": "Warmwasser Betriebsart", "state": { "Off": "Aus", "eco": "Eco", "high": "Komfort", "low": "Eco+", "ownprogram": "Auto" } },
+      "dhw_overall_status": { "name": "Warmwasser Gesamtstatus", "state": { "dhw_enabled": "Warmwasser aktiviert", "dhw_disabled": "Warmwasser deaktiviert" } },
+      "dhw_charge": { "name": "Extra-Warmwasser", "state": { "start": "Aktiv", "stop": "Inaktiv" } },
+      "dhw_charge_duration": { "name": "Extra-Warmwasser Dauer" },
+      "dhw_single_charge_setpoint": { "name": "Extra-Warmwasser Solltemperatur" },
+      "dhw_reduce_temperature_on_alarm": { "name": "Warmwasser Temperaturabsenkung bei Störung", "state": { "off": "Aus", "on": "Ein" } },
+      "dhw_thermal_disinfection_mode": { "name": "Thermische Desinfektion", "state": { "off": "Aus", "on": "Ein" } },
+      "actual_heat_demand": { "name": "Aktuelle Wärmeanforderung", "state": { "ch": "Heizen", "ch, dhw": "Heizen und Warmwasser", "ch, dhw, frost": "Heizen, Warmwasser und Frostschutz", "ch, frost": "Heizen und Frostschutz", "dhw": "Warmwasser", "dhw, frost": "Warmwasser und Frostschutz", "frost": "Frostschutz", "none": "Keine" } },
+      "actual_modulation": { "name": "Aktuelle Modulation" },
+      "compressor_status": { "name": "Kompressorstatus", "state": { "alarm": "Alarm", "cooling": "Kühlen", "defrost": "Abtauen", "dhw": "Warmwasser", "heating": "Heizen", "off": "Aus", "pool": "Pool", "pool_heat": "Poolheizen" } },
+      "electric_heater_status": { "name": "Heizstabstatus", "state": { "alarm": "Alarm", "dhw": "Warmwasser", "heating": "Heizen", "off": "Aus", "pool": "Pool", "pool_heat": "Poolheizen" } },
+      "number_of_starts": { "name": "Anzahl Starts" },
+      "number_of_starts_heating": { "name": "Starts Heizen" },
+      "number_of_starts_dhw": { "name": "Starts Warmwasser" },
+      "number_of_starts_cooling": { "name": "Starts Kühlen" },
+      "total_system_working_time": { "name": "Gesamtlaufzeit System" },
+      "notification_count": { "name": "Anzahl Meldungen" },
+      "heat_pump_type": { "name": "Wärmepumpentyp", "state": { "air_water": "Luft/Wasser", "exhaustAir_water": "Abluft/Wasser", "liquid_water": "Sole/Wasser" } },
+      "heat_source_type": { "name": "Wärmeerzeugertyp", "state": { "GasBoiler": "Gaskessel", "Heatpump": "Wärmepumpe", "No_Appliance": "Kein Gerät", "OilBoiler": "Ölkessel", "eBoiler": "Elektrokessel", "unknownBoiler": "Unbekannter Kessel" } },
+      "heating_circuit_heating_type": { "name": "Heizkreis Heizart", "state": { "convector": "Konvektor", "floor": "Fußbodenheizung", "radiator": "Heizkörper" } },
+      "heating_circuit_control_type": { "name": "Heizkreis Regelungsart", "state": { "wdcoptimized": "Außentemperaturgeführt optimiert", "wdcsimplified": "Außentemperaturgeführt einfach" } },
+      "heating_circuit_switch_program_mode": { "name": "Heizkreis Zeitprogramm-Modus", "state": { "free": "Frei", "level": "Temperaturniveau" } },
+      "gateway_data_processing_status": { "name": "Gateway Datenverarbeitungsstatus", "state": { "completed": "Abgeschlossen", "in_progress": "In Bearbeitung" } },
+      "gateway_timezone": { "name": "Gateway Zeitzone" },
+      "system_brand": { "name": "Systemmarke" },
+      "system_bus": { "name": "Systembus", "state": { "Detecting": "Erkennung", "EMS2_0": "EMS2", "No_Bus": "Kein Bus" } },
+      "system_country": { "name": "Systemland" },
+      "global_season_optimizer_mode": { "name": "Saisonoptimierung", "state": { "cooling": "Kühlen", "heating": "Heizen", "off": "Aus" } },
+      "isrc_support_status": { "name": "iSRC Unterstützung", "state": { "IN_EVALUATION": "In Prüfung", "NOT_SUPPORTED_INCOMPATIBLE_CONTROLLER": "Nicht unterstützt: inkompatibler Regler", "NOT_SUPPORTED_PAIRING_ENABLED": "Nicht unterstützt: Kopplung aktiviert", "SUPPORTED": "Unterstützt" } }
+    },
+    "number": {
+      "heating_circuit_manual_room_setpoint": { "name": "Heizkreis manueller Raumsollwert" },
+      "dhw_charge_duration": { "name": "Extra-Warmwasser Dauer" },
+      "dhw_single_charge_setpoint": { "name": "Extra-Warmwasser Solltemperatur" }
+    },
+    "switch": {
+      "dhw_charge": { "name": "Extra-Warmwasser" },
+      "dhw_reduce_temperature_on_alarm": { "name": "Warmwasser Temperaturabsenkung bei Störung" }
+    }
+  }
+}

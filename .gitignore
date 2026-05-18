@@ -1,0 +1,9 @@
+.analysis/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+buderus_mx300_custom_component.zip
