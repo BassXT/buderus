@@ -2,18 +2,22 @@
 
 Experimental Home Assistant custom integration for Buderus/Bosch systems exposed through an MX300/K30 gateway and the MyBuderus PointT API.
 
-Current status:
+## Status
 
-- MVP for K30/MX300 gateways with sensors, conservative switches, and selected numeric setpoints.
-- Uses SingleKey Authorization Code + PKCE to obtain access and refresh tokens.
-- Write/control support is currently limited to PointT resources that are confirmed as writeable on the tested gateway:
-  - Extra hot water (`/dhwCircuits/dhw1/charge`)
-  - DHW temperature reduction on alarm (`/dhwCircuits/dhw1/reduceTempOnAlarm`)
-  - Heating circuit manual room setpoint (`/heatingCircuits/hc1/manualRoomSetpoint`)
-  - Extra hot water duration (`/dhwCircuits/dhw1/chargeDuration`)
-  - Extra hot water target temperature (`/dhwCircuits/dhw1/singleChargeSetpoint`)
+- Works with the tested K30/MX300 gateway.
+- Provides sensors, German and English entity names, selected controls, and selected numeric setpoints.
+- Uses SingleKey Authorization Code + PKCE and stores a refresh token for automatic token renewal.
+- Polls the Buderus/Bosch cloud API. The MX300 itself is only used as the cloud-connected gateway.
 
-Confirmed resources from the first MX300/K30 capture:
+Confirmed writeable controls on the tested gateway:
+
+- Extra hot water: `/dhwCircuits/dhw1/charge`
+- DHW temperature reduction on alarm: `/dhwCircuits/dhw1/reduceTempOnAlarm`
+- Heating circuit manual room setpoint: `/heatingCircuits/hc1/manualRoomSetpoint`
+- Extra hot water duration: `/dhwCircuits/dhw1/chargeDuration`
+- Extra hot water target temperature: `/dhwCircuits/dhw1/singleChargeSetpoint`
+
+Confirmed read resources from the first MX300/K30 capture:
 
 - `/system/info`
 - `/system/sensors/temperatures/outdoor_t1`
@@ -30,79 +34,41 @@ Confirmed resources from the first MX300/K30 capture:
 - `/heatSources/workingTime/totalSystem`
 - `/notifications`
 
-## Local testing
+## Installation
 
-Copy `custom_components/buderus_ha` into a Home Assistant `custom_components` directory, restart Home Assistant, then add the integration from the UI.
+1. Copy `custom_components/buderus_ha` to your Home Assistant `custom_components` directory.
+2. Restart Home Assistant.
+3. Go to Settings -> Devices & services -> Add integration.
+4. Search for `Buderus MX300`.
+5. Follow the setup form.
 
-Initial setup currently only works reliably in a desktop browser. On iPhone or Android, the installed MyBuderus app can intercept the final `com.buderus.tt.dashtt://app/login` redirect, so Home Assistant cannot receive the authorization code.
+## Initial Setup
 
-On Windows, the friendliest setup path is to register the local redirect helper before starting the Home Assistant config flow:
+The first SingleKey login currently works reliably only in a desktop browser. iPhone and Android are not recommended for the first setup when the MyBuderus app is installed, because the app can intercept the final `com.buderus.tt.dashtt://app/login` redirect before Home Assistant can use it.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\register_windows_oauth_redirect_helper.ps1
-```
+No helper script is required. The setup form shows a SingleKey login URL and asks for the final redirect URL or authorization code.
 
-Then start the Buderus MX300 setup in Home Assistant, open the SingleKey login URL on the PC, and sign in. When the browser asks whether it should open an external app for `com.buderus.tt.dashtt://`, allow it. The helper copies the final redirect URL to the clipboard. Paste that URL into the Home Assistant setup form.
+Short version:
 
-After setup, the helper can be removed again:
+1. Open the browser developer tools with `F12` before logging in.
+2. Open the `Network` tab and enable `Preserve log`.
+3. Open the SingleKey login URL shown by Home Assistant.
+4. Sign in.
+5. A network or redirect error page after login is expected.
+6. In the Network tab, open the last `/auth/connect/authorize/callback` request.
+7. Copy the `Location` response header that starts with `com.buderus.tt.dashtt://app/login`.
+8. Paste that URL into the Home Assistant setup form.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\unregister_windows_oauth_redirect_helper.ps1
-```
+German step-by-step notes are in [docs/erste-einrichtung.md](docs/erste-einrichtung.md).
 
-Fallback without the helper: open the SingleKey login URL in a desktop browser. Before signing in, open the browser developer tools, go to the Network tab, and enable "Preserve log". Then sign in and paste the final redirect URL that starts with:
+## Known Limitations
 
-```text
-com.buderus.tt.dashtt://app/login
-```
+- This integration uses an observed, unofficial API. Buderus/Bosch can change endpoints, scopes, or payloads.
+- SingleKey rejects normal HTTP callback URLs for the MyBuderus client, so Home Assistant cannot currently receive the redirect automatically.
+- The tested SingleKey production server did not expose a working OAuth device-code endpoint for this client.
+- Controls are intentionally limited to resources that reported `writeable: 1` on the tested gateway.
+- Thermal disinfection is exposed as a diagnostic sensor only, because it was not confirmed as writeable.
 
-If SingleKey shows a network or protocol error after login and the final URL is not visible in the address bar, copy the `Location` response header from the last `/auth/connect/authorize/callback` redirect in the Network tab.
+## Development Notes
 
-The integration exchanges the authorization code with PKCE and stores the returned refresh token for automatic token renewal.
-
-SingleKey constraints found during research:
-
-- The MyBuderus client accepts the app redirect URI `com.buderus.tt.dashtt://app/login`.
-- A normal HTTP callback URL is rejected as a misconfigured application.
-- The production SingleKey server returns 404 for the tested OAuth device-code endpoint.
-- On iPhone, the final app redirect is likely handled by the MyBuderus app, so desktop browser setup is currently the most reliable path.
-
-## Research helper
-
-`tools/probe_pointt.ps1` can query known PointT resources with a token from the clipboard:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\probe_pointt.ps1 -UseClipboard
-```
-
-The helper stores responses under `.analysis/pointt`, which is intentionally ignored by Git because it can contain device identifiers and serial numbers.
-
-`tools/oauth_pointt_login.py` can test the SingleKey Authorization Code + PKCE flow outside Home Assistant:
-
-```powershell
-python .\tools\oauth_pointt_login.py
-```
-
-It writes token data under `.analysis/auth`, which is also ignored by Git.
-
-`tools/oauth_callback_login.py` tests whether SingleKey accepts an HTTP callback URL. If it works, the authorization code is received automatically without copying the final redirect URL:
-
-```powershell
-python .\tools\oauth_callback_login.py
-```
-
-To test the same idea from a phone on the local network, bind to all interfaces and use the PC's LAN address:
-
-```powershell
-python .\tools\oauth_callback_login.py --host 0.0.0.0 --public-base-url http://<PC_LAN_IP>:8765 --no-open
-```
-
-Then open `http://<PC_LAN_IP>:8765/` on the phone. If SingleKey accepts that redirect URI, the helper receives the code automatically. If SingleKey rejects it, the app-style redirect remains the only known working redirect URI for this client.
-
-`tools/oauth_device_login.py` tests whether SingleKey allows the OAuth device-code flow for the MyBuderus client. This would be the most phone-friendly setup path because Home Assistant could show a code and the user could authorize it on any browser without copying redirect URLs:
-
-```powershell
-python .\tools\oauth_device_login.py
-```
-
-The production SingleKey server currently returns 404 for the tested device-code endpoint, so the app-style redirect flow remains the only confirmed working SingleKey path.
+Local capture output, tokens, device identifiers, and probe data belong under `.analysis/`, which is ignored by Git. Do not commit that directory.

@@ -3,9 +3,9 @@
     "step": {
       "user": {
         "title": "Buderus MX300",
-        "description": "Warning: Initial setup currently only works reliably in a desktop browser. On iPhone or Android, the installed MyBuderus app can intercept the final `com.buderus.tt.dashtt://app/login` redirect, so Home Assistant cannot receive the authorization code.\n\nRecommended on Windows: run `tools/register_windows_oauth_redirect_helper.ps1` once before setup. Then open this SingleKey login URL on the PC. When the browser asks to open the external app after login, allow it. The final redirect URL is copied to the clipboard; paste it here.\n\nFallback: open browser developer tools before login, go to Network, enable Preserve log, and copy the `Location` header from the last `/auth/connect/authorize/callback` redirect.\n\n{authorization_url}",
+        "description": "Initial setup currently only works reliably in a desktop browser. On iPhone or Android, the installed MyBuderus app can intercept the final app redirect.\n\n1. Open the browser developer tools with F12 before logging in.\n2. Go to the Network tab and enable Preserve log.\n3. Open the SingleKey login URL below and sign in.\n4. After login, a network or redirect error page may appear. That is expected.\n5. In the Network tab, find the last `/auth/connect/authorize/callback` entry.\n6. Copy the `Location` response header. The URL starts with `com.buderus.tt.dashtt://app/login`.\n7. Paste that URL here.\n\n{authorization_url}",
         "data": {
-          "redirect_url": "Redirect URL or authorization code",
+          "redirect_url": "Redirect URL from Location header or authorization code",
           "gateway_id": "Gateway ID"
         }
       }

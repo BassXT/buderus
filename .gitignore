@@ -7,3 +7,4 @@ __pycache__/
 .venv/
 venv/
 buderus_mx300_custom_component.zip
+tools/
