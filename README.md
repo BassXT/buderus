@@ -67,7 +67,3 @@ German step-by-step notes are in [docs/erste-einrichtung.md](docs/erste-einricht
 - SingleKey rejects normal HTTP callback URLs for the MyBuderus client, so Home Assistant cannot currently receive the redirect automatically.
 - The tested SingleKey production server did not expose a working OAuth device-code endpoint for this client.
 - Controls are intentionally limited to resources that reported `writeable: 1` on the tested gateway.
-
-## Development Notes
-
-Local capture output, tokens, device identifiers, and probe data belong under `.analysis/`, which is ignored by Git. Do not commit that directory.
