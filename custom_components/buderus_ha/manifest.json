@@ -1,9 +1,10 @@
 {
   "domain": "buderus_ha",
   "name": "Buderus MX300",
-  "codeowners": [],
+  "codeowners": ["@BassXT"],
   "config_flow": true,
-  "documentation": "https://github.com/local/buderus_ha",
+  "documentation": "https://github.com/BassXT/buderus",
+  "issue_tracker": "https://github.com/BassXT/buderus/issues",
   "iot_class": "cloud_polling",
   "requirements": [],
   "version": "0.1.0"

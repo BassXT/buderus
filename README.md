@@ -2,6 +2,12 @@
 
 Experimental Home Assistant custom integration for Buderus/Bosch systems exposed through an MX300/K30 gateway and the MyBuderus PointT API.
 
+## Disclaimer
+
+This is an unofficial community project. It is not affiliated with, endorsed by, or supported by Buderus, Bosch, Bosch Thermotechnology, SingleKey ID, or Home Assistant.
+
+Use this integration at your own risk. It can read data from your heating system and, for selected entities, send write commands through the Buderus/Bosch cloud API. No warranty is provided. The author is not responsible for damage, malfunction, data loss, increased energy costs, comfort issues, unsupported device behavior, API changes, or other consequences caused by installing or using this integration.
+
 ## Status
 
 - Works with the tested K30/MX300 gateway.
@@ -67,3 +73,7 @@ German step-by-step notes are in [docs/erste-einrichtung.md](docs/erste-einricht
 - SingleKey rejects normal HTTP callback URLs for the MyBuderus client, so Home Assistant cannot currently receive the redirect automatically.
 - The tested SingleKey production server did not expose a working OAuth device-code endpoint for this client.
 - Controls are intentionally limited to resources that reported `writeable: 1` on the tested gateway.
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
