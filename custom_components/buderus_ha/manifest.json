@@ -4,8 +4,8 @@
   "codeowners": ["@BassXT"],
   "config_flow": true,
   "documentation": "https://github.com/BassXT/buderus",
-  "issue_tracker": "https://github.com/BassXT/buderus/issues",
   "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/BassXT/buderus/issues",
   "requirements": [],
   "version": "0.1.0"
 }

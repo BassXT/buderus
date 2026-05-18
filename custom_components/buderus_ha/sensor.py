@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -18,6 +19,13 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
 from .coordinator import BuderusDataUpdateCoordinator
+
+
+def _enum_slug(value: str) -> str:
+    """Convert Bosch/PointT enum values to Home Assistant translation-safe states."""
+    value = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", value.strip())
+    value = re.sub(r"[^a-zA-Z0-9]+", "_", value)
+    return value.strip("_").lower() or "unknown"
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -79,7 +87,7 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         translation_key="heating_circuit_active_switch_program",
         resource_path="/heatingCircuits/hc1/activeSwitchProgram",
         device_class=SensorDeviceClass.ENUM,
-        options=["A", "B"],
+        options=["a", "b"],
     ),
     BuderusSensorEntityDescription(
         key="heating_circuit_current_room_setpoint",
@@ -109,7 +117,7 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         translation_key="heating_circuit_heat_cool_mode",
         resource_path="/heatingCircuits/hc1/heatCoolMode",
         device_class=SensorDeviceClass.ENUM,
-        options=["heat", "cool", "heatCool"],
+        options=["heat", "cool", "heat_cool"],
     ),
     BuderusSensorEntityDescription(
         key="heating_circuit_room_temperature",
@@ -166,7 +174,7 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         translation_key="dhw_operation_mode",
         resource_path="/dhwCircuits/dhw1/operationMode",
         device_class=SensorDeviceClass.ENUM,
-        options=["Off", "low", "high", "ownprogram", "eco"],
+        options=["off", "low", "high", "ownprogram", "eco"],
     ),
     BuderusSensorEntityDescription(
         key="dhw_overall_status",
@@ -227,10 +235,10 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
             "ch",
             "dhw",
             "frost",
-            "ch, dhw",
-            "ch, frost",
-            "dhw, frost",
-            "ch, dhw, frost",
+            "ch_dhw",
+            "ch_frost",
+            "dhw_frost",
+            "ch_dhw_frost",
         ],
     ),
     BuderusSensorEntityDescription(
@@ -307,7 +315,7 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         translation_key="heat_pump_type",
         resource_path="/heatSources/hs1/heatPumpType",
         device_class=SensorDeviceClass.ENUM,
-        options=["air_water", "liquid_water", "exhaustAir_water"],
+        options=["air_water", "liquid_water", "exhaust_air_water"],
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     BuderusSensorEntityDescription(
@@ -315,7 +323,7 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         translation_key="heat_source_type",
         resource_path="/heatSources/hs1/type",
         device_class=SensorDeviceClass.ENUM,
-        options=["No_Appliance", "OilBoiler", "GasBoiler", "Heatpump", "unknownBoiler", "eBoiler"],
+        options=["no_appliance", "oil_boiler", "gas_boiler", "heatpump", "unknown_boiler", "e_boiler"],
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     BuderusSensorEntityDescription(
@@ -367,7 +375,7 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         translation_key="system_bus",
         resource_path="/system/bus",
         device_class=SensorDeviceClass.ENUM,
-        options=["No_Bus", "Detecting", "EMS2_0"],
+        options=["no_bus", "detecting", "ems2_0"],
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     BuderusSensorEntityDescription(
@@ -390,10 +398,10 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         resource_path="/system/iSRC/supportStatus",
         device_class=SensorDeviceClass.ENUM,
         options=[
-            "NOT_SUPPORTED_INCOMPATIBLE_CONTROLLER",
-            "NOT_SUPPORTED_PAIRING_ENABLED",
-            "SUPPORTED",
-            "IN_EVALUATION",
+            "not_supported_incompatible_controller",
+            "not_supported_pairing_enabled",
+            "supported",
+            "in_evaluation",
         ],
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
@@ -436,7 +444,7 @@ class BuderusSensor(CoordinatorEntity[BuderusDataUpdateCoordinator], SensorEntit
 
         if self.entity_description.value_kind == "values_non_empty_join":
             values = [str(value) for value in resource.get("values") or [] if value not in ("", None)]
-            return ", ".join(values) if values else "none"
+            return _enum_slug(", ".join(values)) if values else "none"
 
         if self.entity_description.value_kind == "values_dict_key":
             for item in resource.get("values") or []:
@@ -449,6 +457,8 @@ class BuderusSensor(CoordinatorEntity[BuderusDataUpdateCoordinator], SensorEntit
             return None
         if isinstance(value, (int, float)) and self.entity_description.value_scale != 1.0:
             return value * self.entity_description.value_scale
+        if self.entity_description.device_class == SensorDeviceClass.ENUM and isinstance(value, str):
+            return _enum_slug(value)
         return value
 
     @property
