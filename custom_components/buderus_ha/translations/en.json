@@ -72,6 +72,9 @@
       "dhw_charge_duration": { "name": "Extra hot water duration" },
       "dhw_single_charge_setpoint": { "name": "Extra hot water target temperature" }
     },
+    "select": {
+      "dhw_operation_mode": { "name": "DHW operation mode", "state": { "eco": "Eco", "high": "Comfort", "low": "Eco+", "off": "Off", "ownprogram": "Auto" } }
+    },
     "switch": {
       "dhw_charge": { "name": "Extra hot water" },
       "dhw_reduce_temperature_on_alarm": { "name": "DHW temperature reduction on alarm" }

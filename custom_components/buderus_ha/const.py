@@ -30,4 +30,4 @@ OAUTH_SCOPES = (
 OAUTH_STYLE_ID = "tt_bud"
 OAUTH_TOKEN_URL = "https://singlekey-id.com/auth/connect/token"
 
-PLATFORMS = ["number", "sensor", "switch"]
+PLATFORMS = ["number", "select", "sensor", "switch"]

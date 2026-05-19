@@ -10,6 +10,8 @@ This is an unofficial community project. It is not affiliated with, endorsed by,
 
 Use this integration at your own risk. It can read data from your heating system and, for selected entities, send write commands through the Buderus/Bosch cloud API. No warranty is provided. The author is not responsible for damage, malfunction, data loss, increased energy costs, comfort issues, unsupported device behavior, API changes, or other consequences caused by installing or using this integration.
 
+The Buderus brand icon is sourced from [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:BUDERUS-Logo.png), where it is marked as `PD-textlogo`. Buderus remains a trademark of its respective owner.
+
 ## Status
 
 - Works with the tested K30/MX300 gateway.
@@ -24,6 +26,7 @@ Confirmed writeable controls on the tested gateway:
 - Heating circuit manual room setpoint: `/heatingCircuits/hc1/manualRoomSetpoint`
 - Extra hot water duration: `/dhwCircuits/dhw1/chargeDuration`
 - Extra hot water target temperature: `/dhwCircuits/dhw1/singleChargeSetpoint`
+- DHW operation mode (`Off`, `Eco+`, `Eco`, `Comfort`, `Auto`): `/dhwCircuits/dhw1/operationMode`
 
 Confirmed read resources from the first MX300/K30 capture:
 

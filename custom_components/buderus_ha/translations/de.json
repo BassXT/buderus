@@ -72,6 +72,9 @@
       "dhw_charge_duration": { "name": "Extra-Warmwasser Dauer" },
       "dhw_single_charge_setpoint": { "name": "Extra-Warmwasser Solltemperatur" }
     },
+    "select": {
+      "dhw_operation_mode": { "name": "Warmwasser Betriebsart", "state": { "eco": "Eco", "high": "Komfort", "low": "Eco+", "off": "Aus", "ownprogram": "Auto" } }
+    },
     "switch": {
       "dhw_charge": { "name": "Extra-Warmwasser" },
       "dhw_reduce_temperature_on_alarm": { "name": "Warmwasser Temperaturabsenkung bei Störung" }
