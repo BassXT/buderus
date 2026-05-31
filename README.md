@@ -1,6 +1,6 @@
-# Buderus MX300 Home Assistant Integration
+# Buderus MX300/MX400 Home Assistant Integration
 
-Experimental Home Assistant custom integration for Buderus/Bosch systems exposed through an MX300/K30 gateway and the MyBuderus PointT API.
+Experimental Home Assistant custom integration for Buderus/Bosch systems exposed through an MX300/MX400/K30 gateway and the MyBuderus PointT API.
 
 [![Open your Home Assistant instance and open this repository inside HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=BassXT&repository=buderus&category=integration)
 
