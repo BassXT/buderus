@@ -14,10 +14,10 @@ The Buderus brand icon is sourced from [Wikimedia Commons](https://commons.wikim
 
 ## Status
 
-- Works with the tested K30/MX300 gateway.
+- Works with the tested K30/MX300/MX400 gateway.
 - Provides sensors, German and English entity names, selected controls, and selected numeric setpoints.
 - Uses SingleKey Authorization Code + PKCE and stores a refresh token for automatic token renewal.
-- Polls the Buderus/Bosch cloud API. The MX300 itself is only used as the cloud-connected gateway.
+- Polls the Buderus/Bosch cloud API. The MX300/MX400 itself is only used as the cloud-connected gateway.
 
 Confirmed writeable controls on the tested gateway:
 
