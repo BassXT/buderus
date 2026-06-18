@@ -26,7 +26,7 @@ SELECT_DESCRIPTIONS: tuple[BuderusSelectEntityDescription, ...] = (
         key="dhw_operation_mode",
         translation_key="dhw_operation_mode",
         resource_path="/dhwCircuits/dhw1/operationMode",
-        options=("off", "low", "eco", "high", "ownprogram"),
+        options=("off", "eco", "low", "high", "ownprogram"),
         option_to_value={
             "off": "Off",
             "low": "low",

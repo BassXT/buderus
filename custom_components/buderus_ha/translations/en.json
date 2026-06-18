@@ -37,7 +37,7 @@
       "heating_circuit_summer_winter_threshold": { "name": "Heating circuit summer/winter threshold" },
       "dhw_actual_temperature": { "name": "DHW actual temperature" },
       "dhw_current_setpoint": { "name": "DHW target temperature" },
-      "dhw_operation_mode": { "name": "DHW operation mode", "state": { "off": "Off", "eco": "Eco", "high": "Comfort", "low": "Eco+", "ownprogram": "Auto" } },
+      "dhw_operation_mode": { "name": "DHW operation mode", "state": { "off": "Off", "eco": "Eco+", "high": "Comfort", "low": "Eco", "ownprogram": "Auto" } },
       "dhw_overall_status": { "name": "DHW overall status", "state": { "dhw_enabled": "DHW enabled", "dhw_disabled": "DHW disabled" } },
       "dhw_charge": { "name": "Extra hot water", "state": { "start": "Active", "stop": "Inactive" } },
       "dhw_charge_duration": { "name": "Extra hot water duration" },
@@ -73,7 +73,7 @@
       "dhw_single_charge_setpoint": { "name": "Extra hot water target temperature" }
     },
     "select": {
-      "dhw_operation_mode": { "name": "DHW operation mode", "state": { "eco": "Eco", "high": "Comfort", "low": "Eco+", "off": "Off", "ownprogram": "Auto" } }
+      "dhw_operation_mode": { "name": "DHW operation mode", "state": { "eco": "Eco+", "high": "Comfort", "low": "Eco", "off": "Off", "ownprogram": "Auto" } }
     },
     "switch": {
       "dhw_charge": { "name": "Extra hot water" },

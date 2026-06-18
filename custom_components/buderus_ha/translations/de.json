@@ -37,7 +37,7 @@
       "heating_circuit_summer_winter_threshold": { "name": "Heizkreis Sommer-/Winter-Schwelle" },
       "dhw_actual_temperature": { "name": "Warmwasser Ist-Temperatur" },
       "dhw_current_setpoint": { "name": "Warmwasser Solltemperatur" },
-      "dhw_operation_mode": { "name": "Warmwasser Betriebsart", "state": { "off": "Aus", "eco": "Eco", "high": "Komfort", "low": "Eco+", "ownprogram": "Auto" } },
+      "dhw_operation_mode": { "name": "Warmwasser Betriebsart", "state": { "off": "Aus", "eco": "Eco+", "high": "Komfort", "low": "Eco", "ownprogram": "Auto" } },
       "dhw_overall_status": { "name": "Warmwasser Gesamtstatus", "state": { "dhw_enabled": "Warmwasser aktiviert", "dhw_disabled": "Warmwasser deaktiviert" } },
       "dhw_charge": { "name": "Extra-Warmwasser", "state": { "start": "Aktiv", "stop": "Inaktiv" } },
       "dhw_charge_duration": { "name": "Extra-Warmwasser Dauer" },
@@ -73,7 +73,7 @@
       "dhw_single_charge_setpoint": { "name": "Extra-Warmwasser Solltemperatur" }
     },
     "select": {
-      "dhw_operation_mode": { "name": "Warmwasser Betriebsart", "state": { "eco": "Eco", "high": "Komfort", "low": "Eco+", "off": "Aus", "ownprogram": "Auto" } }
+      "dhw_operation_mode": { "name": "Warmwasser Betriebsart", "state": { "eco": "Eco+", "high": "Komfort", "low": "Eco", "off": "Aus", "ownprogram": "Auto" } }
     },
     "switch": {
       "dhw_charge": { "name": "Extra-Warmwasser" },
