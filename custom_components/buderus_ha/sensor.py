@@ -73,7 +73,7 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         translation_key="heating_circuit_operation_mode",
         resource_path="/heatingCircuits/hc1/operationMode",
         device_class=SensorDeviceClass.ENUM,
-        options=["manual", "auto"],
+        options=["manual", "auto", "off"],
     ),
     BuderusSensorEntityDescription(
         key="heating_circuit_overall_status",
