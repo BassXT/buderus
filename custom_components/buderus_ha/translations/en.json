@@ -25,7 +25,7 @@
       "outdoor_temperature": { "name": "Outdoor temperature" },
       "central_heating_status": { "name": "Central heating status", "state": { "off": "Off", "on": "On" } },
       "heating_circuit_operation_mode": { "name": "Heating circuit operation mode", "state": { "auto": "Auto", "manual": "Manual", "off": "Off" } },
-      "heating_circuit_overall_status": { "name": "Heating circuit overall status", "state": { "ch_enabled": "Heating enabled", "ch_disabled": "Heating disabled" } },
+      "heating_circuit_overall_status": { "name": "Heating circuit overall status", "state": { "ch_enabled": "Heating enabled", "ch_disabled": "Heating disabled", "cooling_manual_on": "Cooling Manual" } },
       "heating_circuit_active_switch_program": { "name": "Heating circuit active switch program" },
       "heating_circuit_current_room_setpoint": { "name": "Heating circuit current room setpoint" },
       "heating_circuit_manual_room_setpoint": { "name": "Heating circuit manual room setpoint" },
