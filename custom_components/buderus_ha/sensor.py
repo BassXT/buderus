@@ -80,7 +80,7 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         translation_key="heating_circuit_overall_status",
         resource_path="/heatingCircuits/hc1/overallStatus",
         device_class=SensorDeviceClass.ENUM,
-        options=["ch_enabled", "ch_disabled", "cooling_manual_on"],
+        options=["ch_enabled", "ch_disabled", "cooling_manual_on", "summer_idle"],
     ),
     BuderusSensorEntityDescription(
         key="heating_circuit_active_switch_program",
@@ -181,7 +181,7 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         translation_key="dhw_overall_status",
         resource_path="/dhwCircuits/dhw1/overallStatus",
         device_class=SensorDeviceClass.ENUM,
-        options=["dhw_enabled", "dhw_disabled"],
+        options=["dhw_enabled", "dhw_disabled", "auto"],
     ),
     BuderusSensorEntityDescription(
         key="dhw_charge",
