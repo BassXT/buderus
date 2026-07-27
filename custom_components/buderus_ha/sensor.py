@@ -181,7 +181,7 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         translation_key="dhw_overall_status",
         resource_path="/dhwCircuits/dhw1/overallStatus",
         device_class=SensorDeviceClass.ENUM,
-        options=["dhw_enabled", "dhw_disabled", "auto"],
+        options=["dhw_enabled", "dhw_disabled", "auto", "manual_on_eco"],
     ),
     BuderusSensorEntityDescription(
         key="dhw_charge",
