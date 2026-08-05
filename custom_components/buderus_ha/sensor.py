@@ -11,7 +11,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfTemperature, UnitOfTime
+from homeassistant.const import UnitOfEnergy, UnitOfTemperature, UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.entity import EntityCategory
@@ -407,17 +407,22 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
     ),
 )
 
-
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     coordinator: BuderusDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities(
+
+    entities: list[SensorEntity] = [
         BuderusSensor(coordinator, description)
         for description in SENSOR_DESCRIPTIONS
+    ]
+    entities.extend(
+        BuderusEmonSensor(coordinator, description)
+        for description in EMON_SENSOR_DESCRIPTIONS
     )
+    async_add_entities(entities)
 
 
 class BuderusSensor(CoordinatorEntity[BuderusDataUpdateCoordinator], SensorEntity):
@@ -471,6 +476,122 @@ class BuderusSensor(CoordinatorEntity[BuderusDataUpdateCoordinator], SensorEntit
             "resource_type": resource.get("type"),
             "writeable": resource.get("writeable"),
         }
+
+    @property
+    def device_info(self) -> dict[str, Any]:
+        gateway = self.coordinator.data.get("gateway", {})
+        partnumber = self.coordinator.data.get("partnumber", {})
+        resources = self.coordinator.data.get("resources", {})
+
+        firmware = resources.get("/gateway/versionFirmware", {}).get("value") or gateway.get("firmwareVersion")
+        hardware = resources.get("/gateway/versionHardware", {}).get("value") or gateway.get("hardwareVersion")
+
+        return {
+            "identifiers": {(DOMAIN, self.coordinator.gateway_id)},
+            "manufacturer": "Buderus/Bosch",
+            "model": f"{gateway.get('deviceType')} {partnumber.get('partNumber')}".strip(),
+            "name": f"Buderus Gateway {self.coordinator.gateway_id}",
+            "sw_version": firmware,
+            "hw_version": hardware,
+            "serial_number": resources.get("/gateway/serialId", {}).get("value"),
+        }
+# --- Energy Monitoring ---------------------------------------------------
+
+_ENERGY_KWH: dict[str, Any] = {
+    "native_unit_of_measurement": UnitOfEnergy.KILO_WATT_HOUR,
+    "device_class": SensorDeviceClass.ENERGY,
+    "state_class": SensorStateClass.TOTAL_INCREASING,
+    "suggested_display_precision": 2,
+}
+
+EMON_SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
+    SensorEntityDescription(
+        key="total_electric",
+        translation_key="emon_total_electric",
+        icon="mdi:transmission-tower",
+        **_ENERGY_KWH,
+    ),
+    SensorEntityDescription(
+        key="total_compressor",
+        translation_key="emon_total_compressor",
+        icon="mdi:heat-pump-outline",
+        **_ENERGY_KWH,
+    ),
+    SensorEntityDescription(
+        key="total_eheater",
+        translation_key="emon_total_eheater",
+        icon="mdi:radiator",
+        **_ENERGY_KWH,
+    ),
+    SensorEntityDescription(
+        key="ch_compressor",
+        translation_key="emon_ch_compressor",
+        icon="mdi:radiator",
+        **_ENERGY_KWH,
+    ),
+    SensorEntityDescription(
+        key="dhw_compressor",
+        translation_key="emon_dhw_compressor",
+        icon="mdi:water-boiler",
+        **_ENERGY_KWH,
+    ),
+    SensorEntityDescription(
+        key="dhw_eheater",
+        translation_key="emon_dhw_eheater",
+        icon="mdi:water-boiler",
+        **_ENERGY_KWH,
+    ),
+    SensorEntityDescription(
+        key="cooling_compressor",
+        translation_key="emon_cooling_compressor",
+        icon="mdi:snowflake",
+        **_ENERGY_KWH,
+    ),
+    SensorEntityDescription(
+        key="total_output_produced",
+        translation_key="emon_total_output_produced",
+        icon="mdi:fire",
+        **_ENERGY_KWH,
+    ),
+    SensorEntityDescription(
+        key="dhw_output_produced",
+        translation_key="emon_dhw_output_produced",
+        icon="mdi:fire",
+        **_ENERGY_KWH,
+    ),
+    SensorEntityDescription(
+        key="scop",
+        translation_key="emon_scop",
+        state_class=SensorStateClass.MEASUREMENT,
+        icon="mdi:gauge",
+        suggested_display_precision=2,
+    ),
+)
+
+
+class BuderusEmonSensor(CoordinatorEntity[BuderusDataUpdateCoordinator], SensorEntity):
+    """Lifetime-Energiezähler aus dem EMON-Zweig der pointt-API."""
+
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        coordinator: BuderusDataUpdateCoordinator,
+        description: SensorEntityDescription,
+    ) -> None:
+        super().__init__(coordinator)
+        self.entity_description = description
+        self._attr_unique_id = f"{coordinator.gateway_id}_emon_{description.key}"
+
+    @property
+    def available(self) -> bool:
+        emon = self.coordinator.data.get("emon") or {}
+        return super().available and self.entity_description.key in emon
+
+    @property
+    def native_value(self) -> float | None:
+        emon = self.coordinator.data.get("emon") or {}
+        return emon.get(self.entity_description.key)
 
     @property
     def device_info(self) -> dict[str, Any]:

@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 import logging
 from typing import Any
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.util import dt as dt_util
 
 from .api import BuderusApiError, BuderusPointTClient
-from .const import DOMAIN
+from .const import DOMAIN, EMON_UPDATE_INTERVAL
 
 LOGGER = logging.getLogger(__name__)
 
@@ -86,6 +87,8 @@ class BuderusDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         )
         self.client = client
         self.gateway_id = gateway_id
+        self._emon_cache: dict[str, float] = {}
+        self._emon_next_update: datetime | None = None
 
     async def _async_update_data(self) -> dict[str, Any]:
         resources: dict[str, dict[str, Any]] = {}
@@ -107,9 +110,28 @@ class BuderusDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         if not resources:
             raise UpdateFailed("No Buderus resources could be fetched")
 
+        await self._async_update_emon()
+
         return {
             "gateway": gateway,
             "partnumber": partnumber,
             "resources": resources,
             "errors": errors,
+            "emon": self._emon_cache,
         }
+
+    async def _async_update_emon(self) -> None:
+        """Lifetime-Zähler nur alle EMON_UPDATE_INTERVAL abrufen."""
+        now = dt_util.utcnow()
+        if self._emon_next_update is not None and now < self._emon_next_update:
+            return
+
+        try:
+            emon = await self.client.get_emon(self.gateway_id)
+        except BuderusApiError as err:
+            LOGGER.debug("EMON-Abfrage fehlgeschlagen: %s", err)
+            return
+
+        if emon:
+            self._emon_cache = emon
+        self._emon_next_update = now + EMON_UPDATE_INTERVAL

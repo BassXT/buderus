@@ -65,8 +65,19 @@
       "system_bus": { "name": "Systembus", "state": { "detecting": "Erkennung", "ems2_0": "EMS2", "no_bus": "Kein Bus" } },
       "system_country": { "name": "Systemland" },
       "global_season_optimizer_mode": { "name": "Saisonoptimierung", "state": { "cooling": "Kühlen", "heating": "Heizen", "off": "Aus" } },
-      "isrc_support_status": { "name": "iSRC Unterstützung", "state": { "in_evaluation": "In Prüfung", "not_supported_incompatible_controller": "Nicht unterstützt: inkompatibler Regler", "not_supported_pairing_enabled": "Nicht unterstützt: Kopplung aktiviert", "supported": "Unterstützt" } }
+      "isrc_support_status": { "name": "iSRC Unterstützung", "state": { "in_evaluation": "In Prüfung", "not_supported_incompatible_controller": "Nicht unterstützt: inkompatibler Regler", "not_supported_pairing_enabled": "Nicht unterstützt: Kopplung aktiviert", "supported": "Unterstützt" } },
+      "emon_total_electric": { "name": "Stromverbrauch gesamt" },
+      "emon_total_compressor": { "name": "Kompressor Stromverbrauch" },
+      "emon_total_eheater": { "name": "Heizstab Stromverbrauch" },
+      "emon_ch_compressor": { "name": "Heizen Stromverbrauch" },
+      "emon_dhw_compressor": { "name": "Warmwasser Stromverbrauch" },
+      "emon_dhw_eheater": { "name": "Warmwasser Heizstab" },
+      "emon_cooling_compressor": { "name": "Kühlen Stromverbrauch" },
+      "emon_total_output_produced": { "name": "Wärmeabgabe gesamt" },
+      "emon_dhw_output_produced": { "name": "Warmwasser Wärmeabgabe" },
+      "emon_scop": { "name": "Arbeitszahl" }
     },
+    
     "number": {
       "heating_circuit_manual_room_setpoint": { "name": "Heizkreis manueller Raumsollwert" },
       "dhw_charge_duration": { "name": "Extra-Warmwasser Dauer" },

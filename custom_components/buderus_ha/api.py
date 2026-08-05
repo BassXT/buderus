@@ -3,11 +3,20 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from inspect import isawaitable
 import json
+import logging
+import re
 from typing import Any
 
 import aiohttp
 
-from .const import DEFAULT_USER_AGENT, POINTT_BASE_URL
+from .const import (
+    DEFAULT_USER_AGENT,
+    EMON_LIFETIME_PATHS,
+    EMON_RECORDING_BASE,
+    POINTT_BASE_URL,
+)
+
+LOGGER = logging.getLogger(__name__)
 
 
 class BuderusApiError(Exception):
@@ -15,7 +24,30 @@ class BuderusApiError(Exception):
 
 
 class BuderusAuthError(BuderusApiError):
-    """Raised when the current access token is rejected."""
+    """Raised when the API rejects the request with 401/403.
+
+    Achtung: Die pointt-API liefert auch dann 403, wenn eine Ressource am
+    Gateway schlicht nicht existiert (z. B. ein zweiter Wärmeerzeuger).
+    """
+
+
+def _snake(name: str) -> str:
+    """outputProduced -> output_produced"""
+    return re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", name).lower()
+
+
+def _flatten_emon_values(payload: dict[str, Any]) -> dict[str, float]:
+    """values:[{"compressor":27.35},{"eheater":3.85}] -> flaches Dict."""
+    out: dict[str, float] = {}
+    for entry in payload.get("values") or []:
+        if not isinstance(entry, dict):
+            continue
+        for key, value in entry.items():
+            try:
+                out[_snake(key)] = float(value)
+            except (TypeError, ValueError):
+                continue
+    return out
 
 
 class BuderusPointTClient:
@@ -54,12 +86,84 @@ class BuderusPointTClient:
             raise BuderusApiError("Unexpected part number response")
         return data
 
-    async def get_resource(self, gateway_id: str, resource_path: str) -> dict[str, Any]:
+    async def get_resource(
+        self,
+        gateway_id: str,
+        resource_path: str,
+        *,
+        params: dict[str, str] | None = None,
+    ) -> dict[str, Any]:
         path = resource_path.strip("/")
-        data = await self._request("GET", f"/gateways/{gateway_id}/resource/{path}")
+        data = await self._request(
+            "GET", f"/gateways/{gateway_id}/resource/{path}", params=params
+        )
         if not isinstance(data, dict):
             raise BuderusApiError(f"Unexpected resource response for {resource_path}")
         return data
+
+    # --- Energy Monitoring ---------------------------------------------
+
+    async def get_emon(self, gateway_id: str) -> dict[str, float]:
+        """Liest alle vorhandenen EMON-Lifetime-Zähler in kWh.
+
+        Nicht vorhandene Domains werden übersprungen, nicht als Fehler
+        gewertet. Ergebnis-Keys: '<domain>_<feld>', z. B. 'dhw_compressor'.
+        """
+        result: dict[str, float] = {}
+
+        for domain, path in EMON_LIFETIME_PATHS.items():
+            try:
+                payload = await self.get_resource(gateway_id, path)
+            except BuderusApiError as err:
+                LOGGER.debug("EMON-Domain %s nicht verfügbar: %s", domain, err)
+                continue
+            for field, value in _flatten_emon_values(payload).items():
+                result[f"{domain}_{field}"] = value
+
+        for domain in EMON_LIFETIME_PATHS:
+            compressor = result.get(f"{domain}_compressor")
+            eheater = result.get(f"{domain}_eheater")
+            if compressor is None and eheater is None:
+                continue
+            result[f"{domain}_electric"] = round(
+                (compressor or 0.0) + (eheater or 0.0), 2
+            )
+
+        electric = result.get("total_electric")
+        produced = result.get("total_output_produced")
+        if electric and produced is not None:
+            result["scop"] = round(produced / electric, 2)
+
+        return result
+
+    async def get_emon_recording(
+        self,
+        gateway_id: str,
+        domain: str,
+        sub: str,
+        interval: str,
+    ) -> dict[str, Any]:
+        """Zeitreihe holen. interval: 'YYYY-MM-DD' | 'YYYY-MM' | 'YYYY'."""
+        return await self.get_resource(
+            gateway_id,
+            f"{EMON_RECORDING_BASE}/{domain}/{sub}",
+            params={"interval": interval},
+        )
+
+    @staticmethod
+    def sum_recording(payload: dict[str, Any]) -> float:
+        """Summiert die y-Werte einer yRecording-Antwort."""
+        total = 0.0
+        for point in payload.get("recording") or []:
+            if not isinstance(point, dict):
+                continue
+            try:
+                total += float(point.get("y") or 0.0)
+            except (TypeError, ValueError):
+                continue
+        return round(total, 2)
+
+    # --- Schreiben -------------------------------------------------------
 
     async def set_resource_value(
         self,
@@ -84,7 +188,9 @@ class BuderusPointTClient:
         last_error: BuderusApiError | None = None
         for payload in payloads:
             try:
-                await self._request("PUT", f"/gateways/{gateway_id}/resource/{path}", json_body=payload)
+                await self._request(
+                    "PUT", f"/gateways/{gateway_id}/resource/{path}", json_body=payload
+                )
                 return
             except BuderusAuthError:
                 raise
@@ -94,7 +200,16 @@ class BuderusPointTClient:
         if last_error is not None:
             raise last_error
 
-    async def _request(self, method: str, path: str, *, json_body: Any | None = None) -> Any:
+    # --- Transport -------------------------------------------------------
+
+    async def _request(
+        self,
+        method: str,
+        path: str,
+        *,
+        params: dict[str, str] | None = None,
+        json_body: Any | None = None,
+    ) -> Any:
         url = f"{self._base_url}/{path.lstrip('/')}"
         access_token = await self._get_access_token()
         headers = {
@@ -105,9 +220,17 @@ class BuderusPointTClient:
             "User-Agent": self._user_agent,
         }
 
-        async with self._session.request(method, url, headers=headers, json=json_body) as response:
+        async with self._session.request(
+            method, url, headers=headers, params=params, json=json_body
+        ) as response:
             if response.status in (401, 403):
-                raise BuderusAuthError(f"API authentication failed: {response.status}")
+                body = await response.text()
+                LOGGER.debug(
+                    "PointT %s %s -> %s | body=%r", method, url, response.status, body
+                )
+                raise BuderusAuthError(
+                    f"API request rejected: {response.status} {body}"
+                )
             if response.status >= 400:
                 body = await response.text()
                 raise BuderusApiError(f"API request failed: {response.status} {body}")
@@ -118,8 +241,10 @@ class BuderusPointTClient:
                 return None
             try:
                 return json.loads(body)
-            except Exception as err:  # noqa: BLE001 - aiohttp can raise multiple parser errors.
-                raise BuderusApiError(f"Invalid JSON response from {url}: {body}") from err
+            except Exception as err:  # noqa: BLE001
+                raise BuderusApiError(
+                    f"Invalid JSON response from {url}: {body}"
+                ) from err
 
     async def _get_access_token(self) -> str:
         if callable(self._access_token):
