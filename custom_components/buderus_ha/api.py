@@ -1,3 +1,5 @@
+"""Async client for the Bosch/Buderus PointT API used by MyBuderus."""
+
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
@@ -28,7 +30,14 @@ class BuderusAuthError(BuderusApiError):
 
     Achtung: Die pointt-API liefert auch dann 403, wenn eine Ressource am
     Gateway schlicht nicht existiert (z. B. ein zweiter Wärmeerzeuger).
+    Deshalb traegt die Exception den HTTP-Status mit: 401 bedeutet
+    "Token abgelaufen/ungueltig" und muss nach oben durchgereicht werden,
+    403 darf beim Abtasten optionaler Ressourcen uebersprungen werden.
     """
+
+    def __init__(self, message: str, status: int = 401) -> None:
+        super().__init__(message)
+        self.status = status
 
 
 def _snake(name: str) -> str:
@@ -60,11 +69,13 @@ class BuderusPointTClient:
         *,
         base_url: str = POINTT_BASE_URL,
         user_agent: str = DEFAULT_USER_AGENT,
+        token_refresh: Callable[[], Any] | None = None,
     ) -> None:
         self._session = session
         self._access_token = access_token
         self._base_url = base_url.rstrip("/")
         self._user_agent = user_agent
+        self._token_refresh = token_refresh
 
     async def get_gateways(self) -> list[dict[str, Any]]:
         data = await self._request("GET", "/gateways/")
@@ -104,18 +115,26 @@ class BuderusPointTClient:
     # --- Energy Monitoring ---------------------------------------------
 
     async def get_emon(self, gateway_id: str) -> dict[str, float]:
-        """Liest alle vorhandenen EMON-Lifetime-Zähler in kWh.
+        """Liest alle vorhandenen EMON-Lifetime-Zaehler in kWh.
 
-        Nicht vorhandene Domains werden übersprungen, nicht als Fehler
-        gewertet. Ergebnis-Keys: '<domain>_<feld>', z. B. 'dhw_compressor'.
+        Nicht vorhandene Domains (403) werden uebersprungen, nicht als Fehler
+        gewertet. Ein abgelaufener Token (401) wird dagegen durchgereicht,
+        damit der Coordinator den Reauth-Flow anstossen kann.
+        Ergebnis-Keys: '<domain>_<feld>', z. B. 'dhw_compressor'.
         """
         result: dict[str, float] = {}
 
         for domain, path in EMON_LIFETIME_PATHS.items():
             try:
                 payload = await self.get_resource(gateway_id, path)
+            except BuderusAuthError as err:
+                if err.status == 401:
+                    # Token tot - nicht als "Domain fehlt" missdeuten.
+                    raise
+                LOGGER.debug("EMON-Domain %s nicht vorhanden (403)", domain)
+                continue
             except BuderusApiError as err:
-                LOGGER.debug("EMON-Domain %s nicht verfügbar: %s", domain, err)
+                LOGGER.debug("EMON-Domain %s fehlgeschlagen: %s", domain, err)
                 continue
             for field, value in _flatten_emon_values(payload).items():
                 result[f"{domain}_{field}"] = value
@@ -133,6 +152,10 @@ class BuderusPointTClient:
         produced = result.get("total_output_produced")
         if electric and produced is not None:
             result["scop"] = round(produced / electric, 2)
+
+        if not result:
+            # Lieber ein lauter Fehler als zehn Sensoren, die still verschwinden.
+            raise BuderusApiError("Keine EMON-Daten erhalten")
 
         return result
 
@@ -209,6 +232,7 @@ class BuderusPointTClient:
         *,
         params: dict[str, str] | None = None,
         json_body: Any | None = None,
+        retry_auth: bool = True,
     ) -> Any:
         url = f"{self._base_url}/{path.lstrip('/')}"
         access_token = await self._get_access_token()
@@ -223,19 +247,36 @@ class BuderusPointTClient:
         async with self._session.request(
             method, url, headers=headers, params=params, json=json_body
         ) as response:
-            if response.status in (401, 403):
+            status = response.status
+
+            if status in (401, 403):
                 body = await response.text()
                 LOGGER.debug(
-                    "PointT %s %s -> %s | body=%r", method, url, response.status, body
+                    "PointT %s %s -> %s | body=%r", method, url, status, body
                 )
+                if status == 401 and retry_auth and self._token_refresh is not None:
+                    LOGGER.debug("401 erhalten - Token erneuern und einmal wiederholen")
+                    refreshed = self._token_refresh()
+                    if isawaitable(refreshed):
+                        await refreshed
+                    return await self._request(
+                        method,
+                        path,
+                        params=params,
+                        json_body=json_body,
+                        retry_auth=False,
+                    )
                 raise BuderusAuthError(
-                    f"API request rejected: {response.status} {body}"
+                    f"API request rejected: {status} {body}", status
                 )
-            if response.status >= 400:
+
+            if status >= 400:
                 body = await response.text()
-                raise BuderusApiError(f"API request failed: {response.status} {body}")
-            if response.status == 204:
+                raise BuderusApiError(f"API request failed: {status} {body}")
+
+            if status == 204:
                 return None
+
             body = await response.text()
             if not body:
                 return None

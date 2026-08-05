@@ -8,6 +8,13 @@
           "redirect_url": "Redirect-URL aus dem Location-Header oder Autorisierungscode",
           "gateway_id": "Gateway-ID"
         }
+      },
+      "reauth_confirm": {
+        "title": "Buderus MX300 - erneut anmelden",
+        "description": "Die gespeicherte Anmeldung für Gateway {gateway_id} ist abgelaufen und muss erneuert werden. Bitte melde dich mit demselben SingleKey-Konto an, das ursprünglich verwendet wurde.\n\nNutze einen Desktop-Browser. Auf iPhone oder Android kann die installierte MyBuderus-App den finalen App-Redirect abfangen.\n\n1. Öffne vor dem Login die Browser-Entwicklertools mit F12.\n2. Wechsle zum Tab Netzwerk und aktiviere Protokoll beibehalten.\n3. Öffne die SingleKey-Login-URL unten und melde dich an.\n4. Nach dem Login kann eine Netzwerk- oder Weiterleitungsfehlermeldung erscheinen. Das ist erwartbar.\n5. Suche im Netzwerk-Tab den letzten Eintrag `/auth/connect/authorize/callback`.\n6. Kopiere aus den Antwort-Headern den `Location` Header. Die URL beginnt mit `com.buderus.tt.dashtt://app/login`.\n7. Füge diese URL hier ein.\n\n{authorization_url}",
+        "data": {
+          "redirect_url": "Redirect-URL aus dem Location-Header oder Autorisierungscode"
+        }
       }
     },
     "error": {
@@ -15,7 +22,9 @@
       "invalid_auth": "SingleKey-Login konnte nicht abgeschlossen werden."
     },
     "abort": {
-      "already_configured": "Dieses Gateway ist bereits eingerichtet."
+      "already_configured": "Dieses Gateway ist bereits eingerichtet.",
+      "reauth_successful": "Erneute Anmeldung erfolgreich.",
+      "wrong_account": "Diese Anmeldung gehört zu einem anderen Gateway. Bitte melde dich mit dem Konto an, mit dem dieser Eintrag eingerichtet wurde."
     }
   },
   "entity": {
@@ -77,7 +86,6 @@
       "emon_dhw_output_produced": { "name": "Warmwasser Wärmeabgabe" },
       "emon_scop": { "name": "Arbeitszahl" }
     },
-    
     "number": {
       "heating_circuit_manual_room_setpoint": { "name": "Heizkreis manueller Raumsollwert" },
       "dhw_charge_duration": { "name": "Extra-Warmwasser Dauer" },

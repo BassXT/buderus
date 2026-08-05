@@ -8,6 +8,13 @@
           "redirect_url": "Redirect URL from Location header or authorization code",
           "gateway_id": "Gateway ID"
         }
+      },
+      "reauth_confirm": {
+        "title": "Buderus MX300 - sign in again",
+        "description": "The stored login for gateway {gateway_id} has expired and needs to be renewed. Please sign in with the same SingleKey account you used originally.\n\nUse a desktop browser. On iPhone or Android, the installed MyBuderus app can intercept the final app redirect.\n\n1. Open the browser developer tools with F12 before logging in.\n2. Go to the Network tab and enable Preserve log.\n3. Open the SingleKey login URL below and sign in.\n4. After login, a network or redirect error page may appear. That is expected.\n5. In the Network tab, find the last `/auth/connect/authorize/callback` entry.\n6. Copy the `Location` response header. The URL starts with `com.buderus.tt.dashtt://app/login`.\n7. Paste that URL here.\n\n{authorization_url}",
+        "data": {
+          "redirect_url": "Redirect URL from Location header or authorization code"
+        }
       }
     },
     "error": {
@@ -15,7 +22,9 @@
       "invalid_auth": "Could not complete the SingleKey login."
     },
     "abort": {
-      "already_configured": "This gateway is already configured."
+      "already_configured": "This gateway is already configured.",
+      "reauth_successful": "Re-authentication was successful.",
+      "wrong_account": "That login belongs to a different gateway. Please sign in with the account that was used to set up this entry."
     }
   },
   "entity": {
@@ -76,9 +85,6 @@
       "emon_total_output_produced": { "name": "Total heat output" },
       "emon_dhw_output_produced": { "name": "DHW heat output" },
       "emon_scop": { "name": "Efficiency" }
-
-    
-    
     },
     "number": {
       "heating_circuit_manual_room_setpoint": { "name": "Heating circuit manual room setpoint" },
