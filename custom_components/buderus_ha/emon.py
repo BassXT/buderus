@@ -35,7 +35,7 @@ def emon_value(payload: dict[str, Any], key: str) -> float | None:
 
 
 def total_electricity(payload: dict[str, Any]) -> float | None:
-    """Return the API total or a complete compressor/heater sum.
+    """Return the API total or a complete heat-pump/auxiliary-heater sum.
 
     Missing components are never interpreted as zero. This avoids reporting a
     plausible but incomplete total when the API returns only a partial payload.
@@ -44,8 +44,26 @@ def total_electricity(payload: dict[str, Any]) -> float | None:
     if "electricity" in values:
         return values["electricity"]
 
-    compressor = values.get("compressor")
-    electric_heater = values.get("eheater")
-    if compressor is None or electric_heater is None:
+    heat_pump = values.get("compressor")
+    auxiliary_heater = values.get("eheater")
+    if heat_pump is None or auxiliary_heater is None:
         return None
-    return fsum((compressor, electric_heater))
+    return fsum((heat_pump, auxiliary_heater))
+
+
+def environmental_energy(payload: dict[str, Any]) -> float | None:
+    """Return heat extracted from the environment for a complete payload.
+
+    The MyBuderus energy balance defines environmental energy as produced heat
+    minus the electricity used by the heat pump and auxiliary heater. Partial
+    payloads and inconsistent negative balances are not reported.
+    """
+    values = extract_emon_values(payload)
+    produced_heat = values.get("outputProduced")
+    heat_pump = values.get("compressor")
+    auxiliary_heater = values.get("eheater")
+    if produced_heat is None or heat_pump is None or auxiliary_heater is None:
+        return None
+
+    result = fsum((produced_heat, -heat_pump, -auxiliary_heater))
+    return result if result >= 0 else None

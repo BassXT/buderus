@@ -25,7 +25,7 @@ from .const import (
     EMON_TOTAL_CONSUMPTION_PATH,
 )
 from .coordinator import BuderusDataUpdateCoordinator
-from .emon import emon_value, total_electricity
+from .emon import emon_value, environmental_energy, total_electricity
 
 
 def _enum_slug(value: str) -> str:
@@ -458,6 +458,15 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         **ENERGY_KWH,
     ),
     BuderusSensorEntityDescription(
+        key="emon_heating_electric_heater",
+        translation_key="emon_heating_electric_heater",
+        resource_path=EMON_CH_CONSUMPTION_PATH,
+        value_key="eheater",
+        value_kind="emon_value",
+        icon="mdi:radiator",
+        **ENERGY_KWH,
+    ),
+    BuderusSensorEntityDescription(
         key="emon_dhw_compressor",
         translation_key="emon_dhw_compressor",
         resource_path=EMON_DHW_CONSUMPTION_PATH,
@@ -482,6 +491,50 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         value_key="compressor",
         value_kind="emon_value",
         icon="mdi:snowflake",
+        **ENERGY_KWH,
+    ),
+    BuderusSensorEntityDescription(
+        key="emon_total_heat_produced",
+        translation_key="emon_total_heat_produced",
+        resource_path=EMON_TOTAL_CONSUMPTION_PATH,
+        value_key="outputProduced",
+        value_kind="emon_value",
+        icon="mdi:heat-wave",
+        **ENERGY_KWH,
+    ),
+    BuderusSensorEntityDescription(
+        key="emon_heating_heat_produced",
+        translation_key="emon_heating_heat_produced",
+        resource_path=EMON_CH_CONSUMPTION_PATH,
+        value_key="outputProduced",
+        value_kind="emon_value",
+        icon="mdi:heat-wave",
+        **ENERGY_KWH,
+    ),
+    BuderusSensorEntityDescription(
+        key="emon_dhw_heat_produced",
+        translation_key="emon_dhw_heat_produced",
+        resource_path=EMON_DHW_CONSUMPTION_PATH,
+        value_key="outputProduced",
+        value_kind="emon_value",
+        icon="mdi:heat-wave",
+        **ENERGY_KWH,
+    ),
+    BuderusSensorEntityDescription(
+        key="emon_cooling_heat_produced",
+        translation_key="emon_cooling_heat_produced",
+        resource_path=EMON_COOLING_CONSUMPTION_PATH,
+        value_key="outputProduced",
+        value_kind="emon_value",
+        icon="mdi:snowflake",
+        **ENERGY_KWH,
+    ),
+    BuderusSensorEntityDescription(
+        key="emon_total_environmental_energy",
+        translation_key="emon_total_environmental_energy",
+        resource_path=EMON_TOTAL_CONSUMPTION_PATH,
+        value_kind="emon_environmental_energy",
+        icon="mdi:leaf",
         **ENERGY_KWH,
     ),
 )
@@ -544,6 +597,9 @@ class BuderusSensor(CoordinatorEntity[BuderusDataUpdateCoordinator], SensorEntit
 
         if self.entity_description.value_kind == "emon_total_electricity":
             return total_electricity(resource)
+
+        if self.entity_description.value_kind == "emon_environmental_energy":
+            return environmental_energy(resource)
 
         value = resource.get(self.entity_description.value_key)
         if value in (32767.0, -32768.0):

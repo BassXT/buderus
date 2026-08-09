@@ -23,9 +23,11 @@ class EmonValuesTest(unittest.TestCase):
         fixture_path = ROOT / "tests" / "fixtures" / "emon_total.json"
         payload = json.loads(fixture_path.read_text(encoding="utf-8"))
 
-        self.assertEqual(EMON.emon_value(payload, "compressor"), 27.35)
-        self.assertEqual(EMON.emon_value(payload, "eheater"), 3.85)
-        self.assertAlmostEqual(EMON.total_electricity(payload), 31.2)
+        self.assertEqual(EMON.emon_value(payload, "compressor"), 33.18)
+        self.assertEqual(EMON.emon_value(payload, "eheater"), 0)
+        self.assertEqual(EMON.emon_value(payload, "outputProduced"), 75.04)
+        self.assertAlmostEqual(EMON.total_electricity(payload), 33.18)
+        self.assertAlmostEqual(EMON.environmental_energy(payload), 41.86)
 
     def test_api_total_takes_precedence(self) -> None:
         payload = {
@@ -50,6 +52,24 @@ class EmonValuesTest(unittest.TestCase):
         payload = {"values": [{"compressor": 0}, {"eheater": 0}]}
 
         self.assertEqual(EMON.total_electricity(payload), 0)
+
+    def test_environmental_energy_requires_complete_balance(self) -> None:
+        self.assertIsNone(
+            EMON.environmental_energy(
+                {"values": [{"outputProduced": 75.04}, {"compressor": 33.18}]}
+            )
+        )
+
+    def test_negative_environmental_energy_is_rejected(self) -> None:
+        payload = {
+            "values": [
+                {"outputProduced": 10},
+                {"compressor": 12},
+                {"eheater": 0},
+            ]
+        }
+
+        self.assertIsNone(EMON.environmental_energy(payload))
 
     def test_invalid_values_are_ignored(self) -> None:
         payload = {

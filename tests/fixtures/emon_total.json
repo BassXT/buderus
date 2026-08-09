@@ -1,7 +1,7 @@
 {
   "values": [
-    { "compressor": 27.35 },
-    { "eheater": 3.85 },
-    { "outputProduced": 55.55 }
+    { "outputProduced": 75.04 },
+    { "eheater": 0.0 },
+    { "compressor": 33.18 }
   ]
 }
