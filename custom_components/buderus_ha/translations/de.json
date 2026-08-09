@@ -65,7 +65,14 @@
       "system_bus": { "name": "Systembus", "state": { "detecting": "Erkennung", "ems2_0": "EMS2", "no_bus": "Kein Bus" } },
       "system_country": { "name": "Systemland" },
       "global_season_optimizer_mode": { "name": "Saisonoptimierung", "state": { "cooling": "Kühlen", "heating": "Heizen", "off": "Aus" } },
-      "isrc_support_status": { "name": "iSRC Unterstützung", "state": { "in_evaluation": "In Prüfung", "not_supported_incompatible_controller": "Nicht unterstützt: inkompatibler Regler", "not_supported_pairing_enabled": "Nicht unterstützt: Kopplung aktiviert", "supported": "Unterstützt" } }
+      "isrc_support_status": { "name": "iSRC Unterstützung", "state": { "in_evaluation": "In Prüfung", "not_supported_incompatible_controller": "Nicht unterstützt: inkompatibler Regler", "not_supported_pairing_enabled": "Nicht unterstützt: Kopplung aktiviert", "supported": "Unterstützt" } },
+      "emon_total_electricity": { "name": "Gesamter Stromverbrauch" },
+      "emon_total_compressor": { "name": "Gesamtverbrauch Kompressor" },
+      "emon_total_electric_heater": { "name": "Gesamtverbrauch Heizstab" },
+      "emon_heating_compressor": { "name": "Kompressorverbrauch Heizen" },
+      "emon_dhw_compressor": { "name": "Kompressorverbrauch Warmwasser" },
+      "emon_dhw_electric_heater": { "name": "Heizstabverbrauch Warmwasser" },
+      "emon_cooling_compressor": { "name": "Kompressorverbrauch Kühlen" }
     },
     "number": {
       "heating_circuit_manual_room_setpoint": { "name": "Heizkreis manueller Raumsollwert" },

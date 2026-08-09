@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Add cumulative electricity consumption sensors from the PointT energy-monitoring resources.
+
 ## 0.1.3 - 2026-07-15
 
 ### Fixed

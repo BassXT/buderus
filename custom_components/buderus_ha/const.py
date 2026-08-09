@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import timedelta
+
 DOMAIN = "buderus_ha"
 
 CONF_ACCESS_TOKEN = "access_token"
@@ -31,3 +33,16 @@ OAUTH_STYLE_ID = "tt_bud"
 OAUTH_TOKEN_URL = "https://singlekey-id.com/auth/connect/token"
 
 PLATFORMS = ["number", "select", "sensor", "switch"]
+
+EMON_TOTAL_CONSUMPTION_PATH = "/heatSources/emon/totalConsumption"
+EMON_CH_CONSUMPTION_PATH = "/heatSources/emon/chConsumption"
+EMON_DHW_CONSUMPTION_PATH = "/heatSources/emon/dhwConsumption"
+EMON_COOLING_CONSUMPTION_PATH = "/heatSources/emon/coolingConsumption"
+
+EMON_RESOURCE_PATHS: tuple[str, ...] = (
+    EMON_TOTAL_CONSUMPTION_PATH,
+    EMON_CH_CONSUMPTION_PATH,
+    EMON_DHW_CONSUMPTION_PATH,
+    EMON_COOLING_CONSUMPTION_PATH,
+)
+EMON_UPDATE_INTERVAL = timedelta(minutes=10)

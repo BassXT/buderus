@@ -65,7 +65,14 @@
       "system_bus": { "name": "System bus", "state": { "detecting": "Detecting", "ems2_0": "EMS2", "no_bus": "No bus" } },
       "system_country": { "name": "System country" },
       "global_season_optimizer_mode": { "name": "Global season optimizer mode", "state": { "cooling": "Cooling", "heating": "Heating", "off": "Off" } },
-      "isrc_support_status": { "name": "iSRC support status", "state": { "in_evaluation": "In evaluation", "not_supported_incompatible_controller": "Not supported: incompatible controller", "not_supported_pairing_enabled": "Not supported: pairing enabled", "supported": "Supported" } }
+      "isrc_support_status": { "name": "iSRC support status", "state": { "in_evaluation": "In evaluation", "not_supported_incompatible_controller": "Not supported: incompatible controller", "not_supported_pairing_enabled": "Not supported: pairing enabled", "supported": "Supported" } },
+      "emon_total_electricity": { "name": "Total electricity consumption" },
+      "emon_total_compressor": { "name": "Total compressor consumption" },
+      "emon_total_electric_heater": { "name": "Total electric heater consumption" },
+      "emon_heating_compressor": { "name": "Heating compressor consumption" },
+      "emon_dhw_compressor": { "name": "DHW compressor consumption" },
+      "emon_dhw_electric_heater": { "name": "DHW electric heater consumption" },
+      "emon_cooling_compressor": { "name": "Cooling compressor consumption" }
     },
     "number": {
       "heating_circuit_manual_room_setpoint": { "name": "Heating circuit manual room setpoint" },

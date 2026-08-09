@@ -11,14 +11,21 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfTemperature, UnitOfTime
+from homeassistant.const import UnitOfEnergy, UnitOfTemperature, UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
+from .const import (
+    DOMAIN,
+    EMON_CH_CONSUMPTION_PATH,
+    EMON_COOLING_CONSUMPTION_PATH,
+    EMON_DHW_CONSUMPTION_PATH,
+    EMON_TOTAL_CONSUMPTION_PATH,
+)
 from .coordinator import BuderusDataUpdateCoordinator
+from .emon import emon_value, total_electricity
 
 
 def _enum_slug(value: str) -> str:
@@ -34,6 +41,16 @@ class BuderusSensorEntityDescription(SensorEntityDescription):
     value_key: str = "value"
     value_kind: str = "value"
     value_scale: float = 1.0
+    requires_value: bool = False
+
+
+ENERGY_KWH: dict[str, Any] = {
+    "device_class": SensorDeviceClass.ENERGY,
+    "native_unit_of_measurement": UnitOfEnergy.KILO_WATT_HOUR,
+    "state_class": SensorStateClass.TOTAL_INCREASING,
+    "suggested_display_precision": 2,
+    "requires_value": True,
+}
 
 
 SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
@@ -405,6 +422,68 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         ],
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
+    BuderusSensorEntityDescription(
+        key="emon_total_electricity",
+        translation_key="emon_total_electricity",
+        resource_path=EMON_TOTAL_CONSUMPTION_PATH,
+        value_kind="emon_total_electricity",
+        icon="mdi:transmission-tower",
+        **ENERGY_KWH,
+    ),
+    BuderusSensorEntityDescription(
+        key="emon_total_compressor",
+        translation_key="emon_total_compressor",
+        resource_path=EMON_TOTAL_CONSUMPTION_PATH,
+        value_key="compressor",
+        value_kind="emon_value",
+        icon="mdi:heat-pump-outline",
+        **ENERGY_KWH,
+    ),
+    BuderusSensorEntityDescription(
+        key="emon_total_electric_heater",
+        translation_key="emon_total_electric_heater",
+        resource_path=EMON_TOTAL_CONSUMPTION_PATH,
+        value_key="eheater",
+        value_kind="emon_value",
+        icon="mdi:radiator",
+        **ENERGY_KWH,
+    ),
+    BuderusSensorEntityDescription(
+        key="emon_heating_compressor",
+        translation_key="emon_heating_compressor",
+        resource_path=EMON_CH_CONSUMPTION_PATH,
+        value_key="compressor",
+        value_kind="emon_value",
+        icon="mdi:radiator",
+        **ENERGY_KWH,
+    ),
+    BuderusSensorEntityDescription(
+        key="emon_dhw_compressor",
+        translation_key="emon_dhw_compressor",
+        resource_path=EMON_DHW_CONSUMPTION_PATH,
+        value_key="compressor",
+        value_kind="emon_value",
+        icon="mdi:water-boiler",
+        **ENERGY_KWH,
+    ),
+    BuderusSensorEntityDescription(
+        key="emon_dhw_electric_heater",
+        translation_key="emon_dhw_electric_heater",
+        resource_path=EMON_DHW_CONSUMPTION_PATH,
+        value_key="eheater",
+        value_kind="emon_value",
+        icon="mdi:water-boiler",
+        **ENERGY_KWH,
+    ),
+    BuderusSensorEntityDescription(
+        key="emon_cooling_compressor",
+        translation_key="emon_cooling_compressor",
+        resource_path=EMON_COOLING_CONSUMPTION_PATH,
+        value_key="compressor",
+        value_kind="emon_value",
+        icon="mdi:snowflake",
+        **ENERGY_KWH,
+    ),
 )
 
 
@@ -434,6 +513,14 @@ class BuderusSensor(CoordinatorEntity[BuderusDataUpdateCoordinator], SensorEntit
         self._attr_unique_id = f"{coordinator.gateway_id}_{description.key}"
 
     @property
+    def available(self) -> bool:
+        if not super().available:
+            return False
+        if self.entity_description.requires_value:
+            return self.native_value is not None
+        return True
+
+    @property
     def native_value(self) -> Any:
         resource = self.coordinator.data["resources"].get(self.entity_description.resource_path)
         if not resource:
@@ -451,6 +538,12 @@ class BuderusSensor(CoordinatorEntity[BuderusDataUpdateCoordinator], SensorEntit
                 if isinstance(item, dict) and self.entity_description.value_key in item:
                     return item[self.entity_description.value_key]
             return None
+
+        if self.entity_description.value_kind == "emon_value":
+            return emon_value(resource, self.entity_description.value_key)
+
+        if self.entity_description.value_kind == "emon_total_electricity":
+            return total_electricity(resource)
 
         value = resource.get(self.entity_description.value_key)
         if value in (32767.0, -32768.0):
