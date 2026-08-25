@@ -33,7 +33,7 @@
       "heating_circuit_heat_cool_mode": { "name": "Heizkreis Heiz-/Kühlmodus", "state": { "cool": "Kühlen", "heat": "Heizen", "heat_cool": "Heizen/Kühlen" } },
       "heating_circuit_room_temperature": { "name": "Heizkreis Raumtemperatur" },
       "heating_circuit_max_flow_temperature": { "name": "Heizkreis maximale Vorlauftemperatur" },
-      "heating_circuit_summer_winter_switch_mode": { "name": "Heizkreis Sommer-/Winter-Umschaltung", "state": { "automatic": "Automatisch", "forced": "Erzwungen", "off": "Aus" } },
+      "heating_circuit_summer_winter_switch_mode": { "name": "Heizkreis Sommer-/Winter-Umschaltung", "state": { "automatic": "Automatisch", "cooling": "Kühlen", "forced": "Erzwungen", "off": "Aus" } },
       "heating_circuit_summer_winter_threshold": { "name": "Heizkreis Sommer-/Winter-Schwelle" },
       "dhw_actual_temperature": { "name": "Warmwasser Ist-Temperatur" },
       "dhw_current_setpoint": { "name": "Warmwasser Solltemperatur" },

@@ -141,7 +141,7 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         translation_key="heating_circuit_summer_winter_switch_mode",
         resource_path="/heatingCircuits/hc1/suWiSwitchMode",
         device_class=SensorDeviceClass.ENUM,
-        options=["off", "automatic", "forced"],
+        options=["off", "automatic", "forced", "cooling"],
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     BuderusSensorEntityDescription(

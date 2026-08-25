@@ -33,7 +33,7 @@
       "heating_circuit_heat_cool_mode": { "name": "Heating circuit heat/cool mode", "state": { "cool": "Cool", "heat": "Heat", "heat_cool": "Heat/cool" } },
       "heating_circuit_room_temperature": { "name": "Heating circuit room temperature" },
       "heating_circuit_max_flow_temperature": { "name": "Heating circuit max flow temperature" },
-      "heating_circuit_summer_winter_switch_mode": { "name": "Heating circuit summer/winter switch mode", "state": { "automatic": "Automatic", "forced": "Forced", "off": "Off" } },
+      "heating_circuit_summer_winter_switch_mode": { "name": "Heating circuit summer/winter switch mode", "state": { "automatic": "Automatic", "cooling": "Cooling", "forced": "Forced", "off": "Off" } },
       "heating_circuit_summer_winter_threshold": { "name": "Heating circuit summer/winter threshold" },
       "dhw_actual_temperature": { "name": "DHW actual temperature" },
       "dhw_current_setpoint": { "name": "DHW target temperature" },
