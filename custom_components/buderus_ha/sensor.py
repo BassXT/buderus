@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import logging
 import re
 from typing import Any
 
@@ -19,6 +20,12 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
 from .coordinator import BuderusDataUpdateCoordinator
+
+_LOGGER = logging.getLogger(__name__)
+
+# Enum values that were already reported as unknown, so each one is logged once
+# per Home Assistant run instead of on every coordinator update.
+_REPORTED_UNKNOWN_ENUM_VALUES: set[tuple[str, str]] = set()
 
 
 def _enum_slug(value: str) -> str:
@@ -444,7 +451,7 @@ class BuderusSensor(CoordinatorEntity[BuderusDataUpdateCoordinator], SensorEntit
 
         if self.entity_description.value_kind == "values_non_empty_join":
             values = [str(value) for value in resource.get("values") or [] if value not in ("", None)]
-            return _enum_slug(", ".join(values)) if values else "none"
+            return self._enum_state(", ".join(values)) if values else "none"
 
         if self.entity_description.value_kind == "values_dict_key":
             for item in resource.get("values") or []:
@@ -458,8 +465,33 @@ class BuderusSensor(CoordinatorEntity[BuderusDataUpdateCoordinator], SensorEntit
         if isinstance(value, (int, float)) and self.entity_description.value_scale != 1.0:
             return value * self.entity_description.value_scale
         if self.entity_description.device_class == SensorDeviceClass.ENUM and isinstance(value, str):
-            return _enum_slug(value)
+            return self._enum_state(value)
         return value
+
+    def _enum_state(self, value: str) -> str | None:
+        """Return the enum state, or None if the API reports an undeclared value.
+
+        The API occasionally returns values that are not part of the declared
+        options, which Home Assistant rejects with a ValueError on every update.
+        Reporting the sensor as unknown keeps the entity usable and logs the
+        undeclared value once so it can be added to the description.
+        """
+        state = _enum_slug(value)
+        options = self.entity_description.options
+        if options is not None and state not in options:
+            marker = (self.entity_description.key, state)
+            if marker not in _REPORTED_UNKNOWN_ENUM_VALUES:
+                _REPORTED_UNKNOWN_ENUM_VALUES.add(marker)
+                _LOGGER.warning(
+                    "%s returned the undeclared value '%s' for %s; reporting the sensor "
+                    "as unknown. Please report this value at "
+                    "https://github.com/BassXT/buderus/issues",
+                    self.entity_description.resource_path,
+                    state,
+                    self.entity_description.key,
+                )
+            return None
+        return state
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:
