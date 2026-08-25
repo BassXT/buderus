@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Add `cooling` as a valid heating circuit summer/winter switch mode and include
+  translations. Fixes #19.
+- Report enum values that are not declared in a sensor description as unknown and
+  log them once instead of raising a `ValueError` on every coordinator update.
+  Fixes #7, #9 and the remaining cases of #5.
+
 ## 0.1.3 - 2026-07-15
 
 ### Fixed
