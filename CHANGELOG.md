@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 - 2026-08-27
 
 ### Added
 
@@ -15,6 +15,9 @@
   log them once instead of raising a `ValueError` on every coordinator update.
   Prevents recurrences of #5, #7, #9, and #19.
 - Add the missing state translations for heating circuit switch programs A and B.
+- Log the underlying SingleKey or gateway validation error during initial setup so
+  the generic setup error can be diagnosed without logging the submitted redirect
+  URL or authorization code. Helps investigate #6.
 
 ## 0.1.3 - 2026-07-15
 

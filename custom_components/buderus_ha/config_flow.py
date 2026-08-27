@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -16,7 +16,15 @@ from .auth import (
     create_state,
     parse_authorization_response,
 )
-from .const import CONF_ACCESS_TOKEN, CONF_EXPIRES_AT, CONF_GATEWAY_ID, CONF_REFRESH_TOKEN, DOMAIN
+from .const import (
+    CONF_ACCESS_TOKEN,
+    CONF_EXPIRES_AT,
+    CONF_GATEWAY_ID,
+    CONF_REFRESH_TOKEN,
+    DOMAIN,
+)
+
+_LOGGER = logging.getLogger(__name__)
 
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
@@ -79,9 +87,11 @@ class BuderusConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if not token_data.get(CONF_REFRESH_TOKEN):
                     raise BuderusAuthError("Token response did not include a refresh token")
                 info = await validate_input(self.hass, token_data, user_input)
-            except BuderusAuthError:
+            except BuderusAuthError as err:
+                _LOGGER.warning("SingleKey login failed: %s", err)
                 errors["base"] = "invalid_auth"
-            except BuderusApiError:
+            except BuderusApiError as err:
+                _LOGGER.warning("Buderus gateway validation failed during setup: %s", err)
                 errors["base"] = "cannot_connect"
             else:
                 await self.async_set_unique_id(info["gateway_id"])
