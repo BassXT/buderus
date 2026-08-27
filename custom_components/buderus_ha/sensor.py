@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
-import re
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -13,8 +13,8 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfEnergy, UnitOfTemperature, UnitOfTime
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.entity import EntityCategory
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
@@ -26,14 +26,13 @@ from .const import (
 )
 from .coordinator import BuderusDataUpdateCoordinator
 from .emon import emon_value, environmental_energy, total_electricity
+from .enum_helpers import enum_slug, enum_state
 
+_LOGGER = logging.getLogger(__name__)
 
-def _enum_slug(value: str) -> str:
-    """Convert Bosch/PointT enum values to Home Assistant translation-safe states."""
-    value = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", value.strip())
-    value = re.sub(r"[^a-zA-Z0-9]+", "_", value)
-    return value.strip("_").lower() or "unknown"
-
+# Enum values that were already reported as unknown, so each one is logged once
+# per Home Assistant run instead of on every coordinator update.
+_REPORTED_UNKNOWN_ENUM_VALUES: set[tuple[str, str]] = set()
 
 @dataclass(frozen=True, kw_only=True)
 class BuderusSensorEntityDescription(SensorEntityDescription):
@@ -97,7 +96,14 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         translation_key="heating_circuit_overall_status",
         resource_path="/heatingCircuits/hc1/overallStatus",
         device_class=SensorDeviceClass.ENUM,
-        options=["ch_enabled", "ch_disabled", "cooling_manual_on", "summer_idle"],
+        options=[
+            "ch_enabled",
+            "ch_disabled",
+            "cooling_manual_on",
+            "summer_idle",
+            "heating_auto",
+            "heating_manual_off",
+        ],
     ),
     BuderusSensorEntityDescription(
         key="heating_circuit_active_switch_program",
@@ -158,7 +164,7 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         translation_key="heating_circuit_summer_winter_switch_mode",
         resource_path="/heatingCircuits/hc1/suWiSwitchMode",
         device_class=SensorDeviceClass.ENUM,
-        options=["off", "automatic", "forced"],
+        options=["off", "automatic", "forced", "cooling"],
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     BuderusSensorEntityDescription(
@@ -198,7 +204,13 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         translation_key="dhw_overall_status",
         resource_path="/dhwCircuits/dhw1/overallStatus",
         device_class=SensorDeviceClass.ENUM,
-        options=["dhw_enabled", "dhw_disabled", "auto", "manual_on_eco"],
+        options=[
+            "dhw_enabled",
+            "dhw_disabled",
+            "auto",
+            "manual_on_eco",
+            "manual_on_high",
+        ],
     ),
     BuderusSensorEntityDescription(
         key="dhw_charge",
@@ -584,7 +596,7 @@ class BuderusSensor(CoordinatorEntity[BuderusDataUpdateCoordinator], SensorEntit
 
         if self.entity_description.value_kind == "values_non_empty_join":
             values = [str(value) for value in resource.get("values") or [] if value not in ("", None)]
-            return _enum_slug(", ".join(values)) if values else "none"
+            return self._enum_state(", ".join(values)) if values else "none"
 
         if self.entity_description.value_kind == "values_dict_key":
             for item in resource.get("values") or []:
@@ -607,8 +619,33 @@ class BuderusSensor(CoordinatorEntity[BuderusDataUpdateCoordinator], SensorEntit
         if isinstance(value, (int, float)) and self.entity_description.value_scale != 1.0:
             return value * self.entity_description.value_scale
         if self.entity_description.device_class == SensorDeviceClass.ENUM and isinstance(value, str):
-            return _enum_slug(value)
+            return self._enum_state(value)
         return value
+
+    def _enum_state(self, value: str) -> str | None:
+        """Return the enum state, or None if the API reports an undeclared value.
+
+        The API occasionally returns values that are not part of the declared
+        options, which Home Assistant rejects with a ValueError on every update.
+        Reporting the sensor as unknown keeps the entity usable and logs the
+        undeclared value once so it can be added to the description.
+        """
+        options = self.entity_description.options
+        state = enum_state(value, options)
+        if state is None:
+            undeclared_state = enum_slug(value)
+            marker = (self.entity_description.key, undeclared_state)
+            if marker not in _REPORTED_UNKNOWN_ENUM_VALUES:
+                _REPORTED_UNKNOWN_ENUM_VALUES.add(marker)
+                _LOGGER.warning(
+                    "%s returned the undeclared value '%s' for %s; reporting the sensor "
+                    "as unknown. Please report this value at "
+                    "https://github.com/BassXT/buderus/issues",
+                    self.entity_description.resource_path,
+                    undeclared_state,
+                    self.entity_description.key,
+                )
+        return state
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:

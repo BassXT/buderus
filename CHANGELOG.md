@@ -6,6 +6,16 @@
 
 - Add cumulative electricity consumption, produced heat, and environmental energy sensors from the PointT energy-monitoring resources.
 
+### Fixed
+
+- Add the reported `cooling`, `heating_auto`, `heating_manual_off`,
+  `manual_on_eco`, and `manual_on_high` enum values with English and German
+  translations. Fixes #7, #9, and #19.
+- Report enum values that are not declared in a sensor description as unknown and
+  log them once instead of raising a `ValueError` on every coordinator update.
+  Prevents recurrences of #5, #7, #9, and #19.
+- Add the missing state translations for heating circuit switch programs A and B.
+
 ## 0.1.3 - 2026-07-15
 
 ### Fixed
