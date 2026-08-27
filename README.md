@@ -16,6 +16,7 @@ The Buderus brand icon is sourced from [Wikimedia Commons](https://commons.wikim
 
 - Works with the tested K30/MX300/MX400 gateway.
 - Provides sensors, German and English entity names, selected controls, and selected numeric setpoints.
+- Provides cumulative electricity consumption, produced heat, and environmental energy sensors for supported heat pumps.
 - Uses SingleKey Authorization Code + PKCE and stores a refresh token for automatic token renewal.
 - Polls the Buderus/Bosch cloud API. The MX300/MX400 itself is only used as the cloud-connected gateway.
 
@@ -44,6 +45,13 @@ Confirmed read resources from the first MX300/K30 capture:
 - `/heatSources/numberOfStarts`
 - `/heatSources/workingTime/totalSystem`
 - `/notifications`
+
+Confirmed energy-monitoring resources on compatible heat pumps:
+
+- `/heatSources/emon/totalConsumption`
+- `/heatSources/emon/chConsumption`
+- `/heatSources/emon/dhwConsumption`
+- `/heatSources/emon/coolingConsumption`
 
 ## Installation
 
@@ -91,6 +99,9 @@ German step-by-step notes are in [docs/erste-einrichtung.md](docs/erste-einricht
 - SingleKey rejects normal HTTP callback URLs for the MyBuderus client, so Home Assistant cannot currently receive the redirect automatically.
 - The tested SingleKey production server did not expose a working OAuth device-code endpoint for this client.
 - Controls are intentionally limited to resources that reported `writeable: 1` on the tested gateway.
+- Energy-monitoring values are cumulative kWh counters, not real-time power readings.
+- Unsupported energy-monitoring domains remain unavailable without affecting other entities.
+- Historical hourly, daily, and monthly energy recordings are intentionally outside the scope of the current integration.
 
 ## License
 

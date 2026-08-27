@@ -17,6 +17,10 @@ class BuderusApiError(Exception):
 class BuderusAuthError(BuderusApiError):
     """Raised when the current access token is rejected."""
 
+    def __init__(self, message: str, status: int) -> None:
+        super().__init__(message)
+        self.status = status
+
 
 class BuderusPointTClient:
     """Small async client for the Bosch/Buderus PointT API used by MyBuderus."""
@@ -107,7 +111,10 @@ class BuderusPointTClient:
 
         async with self._session.request(method, url, headers=headers, json=json_body) as response:
             if response.status in (401, 403):
-                raise BuderusAuthError(f"API authentication failed: {response.status}")
+                raise BuderusAuthError(
+                    f"API authentication failed: {response.status}",
+                    response.status,
+                )
             if response.status >= 400:
                 body = await response.text()
                 raise BuderusApiError(f"API request failed: {response.status} {body}")

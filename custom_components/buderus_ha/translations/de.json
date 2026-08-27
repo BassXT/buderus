@@ -65,7 +65,20 @@
       "system_bus": { "name": "Systembus", "state": { "detecting": "Erkennung", "ems2_0": "EMS2", "no_bus": "Kein Bus" } },
       "system_country": { "name": "Systemland" },
       "global_season_optimizer_mode": { "name": "Saisonoptimierung", "state": { "cooling": "Kühlen", "heating": "Heizen", "off": "Aus" } },
-      "isrc_support_status": { "name": "iSRC Unterstützung", "state": { "in_evaluation": "In Prüfung", "not_supported_incompatible_controller": "Nicht unterstützt: inkompatibler Regler", "not_supported_pairing_enabled": "Nicht unterstützt: Kopplung aktiviert", "supported": "Unterstützt" } }
+      "isrc_support_status": { "name": "iSRC Unterstützung", "state": { "in_evaluation": "In Prüfung", "not_supported_incompatible_controller": "Nicht unterstützt: inkompatibler Regler", "not_supported_pairing_enabled": "Nicht unterstützt: Kopplung aktiviert", "supported": "Unterstützt" } },
+      "emon_total_electricity": { "name": "Stromverbrauch gesamt" },
+      "emon_total_compressor": { "name": "Stromverbrauch Wärmepumpe gesamt" },
+      "emon_total_electric_heater": { "name": "Stromverbrauch elektrischer Zuheizer gesamt" },
+      "emon_heating_compressor": { "name": "Stromverbrauch Wärmepumpe Heizen" },
+      "emon_heating_electric_heater": { "name": "Stromverbrauch elektrischer Zuheizer Heizen" },
+      "emon_dhw_compressor": { "name": "Stromverbrauch Wärmepumpe Warmwasser" },
+      "emon_dhw_electric_heater": { "name": "Stromverbrauch elektrischer Zuheizer Warmwasser" },
+      "emon_cooling_compressor": { "name": "Stromverbrauch Wärmepumpe Kühlen" },
+      "emon_total_heat_produced": { "name": "Erzeugte Wärme gesamt" },
+      "emon_heating_heat_produced": { "name": "Erzeugte Wärme Heizen" },
+      "emon_dhw_heat_produced": { "name": "Erzeugte Wärme Warmwasser" },
+      "emon_cooling_heat_produced": { "name": "Erzeugte Kühlenergie" },
+      "emon_total_environmental_energy": { "name": "Umweltenergie gesamt" }
     },
     "number": {
       "heating_circuit_manual_room_setpoint": { "name": "Heizkreis manueller Raumsollwert" },
