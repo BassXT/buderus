@@ -38,7 +38,7 @@
       "dhw_actual_temperature": { "name": "Warmwasser Ist-Temperatur" },
       "dhw_current_setpoint": { "name": "Warmwasser Solltemperatur" },
       "dhw_operation_mode": { "name": "Warmwasser Betriebsart", "state": { "off": "Aus", "eco": "Eco+", "high": "Komfort", "low": "Eco", "ownprogram": "Auto" } },
-      "dhw_overall_status": { "name": "Warmwasser Gesamtstatus", "state": { "dhw_enabled": "Warmwasser aktiviert", "dhw_disabled": "Warmwasser deaktiviert", "auto": "Auto" } },
+      "dhw_overall_status": { "name": "Warmwasser Gesamtstatus", "state": { "dhw_enabled": "Warmwasser aktiviert", "dhw_disabled": "Warmwasser deaktiviert", "auto": "Auto", "manual_on_eco": "Manuell EIN (Eco)" } },
       "dhw_charge": { "name": "Extra-Warmwasser", "state": { "start": "Aktiv", "stop": "Inaktiv" } },
       "dhw_charge_duration": { "name": "Extra-Warmwasser Dauer" },
       "dhw_single_charge_setpoint": { "name": "Extra-Warmwasser Solltemperatur" },
