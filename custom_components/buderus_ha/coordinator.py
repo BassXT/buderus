@@ -40,6 +40,8 @@ RESOURCE_PATHS: tuple[str, ...] = (
     "/heatingCircuits/hc1/suWiSwitchMode",
     "/heatingCircuits/hc1/suWiThreshold",
     "/heatingCircuits/hc1/switchProgramMode",
+    "/heatingCircuits/hc1/boostMode",
+    "/heatingCircuits/hc1/boostDuration",
     "/dhwCircuits",
     "/dhwCircuits/dhw1/actualTemp",
     "/dhwCircuits/dhw1/charge",

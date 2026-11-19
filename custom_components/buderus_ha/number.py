@@ -54,6 +54,17 @@ NUMBER_DESCRIPTIONS: tuple[BuderusNumberEntityDescription, ...] = (
         mode=NumberMode.SLIDER,
         entity_category=EntityCategory.CONFIG,
     ),
+    BuderusNumberEntityDescription(
+        key="heating_circuit_boost_duration",
+        name="Heating circuit boost duration",
+        resource_path="/heatingCircuits/hc1/boostDuration",
+        native_min_value=1,
+        native_max_value=8,
+        native_step=1,
+        native_unit_of_measurement=UnitOfTime.HOURS,
+        mode=NumberMode.BOX,
+        entity_category=EntityCategory.CONFIG,
+    ),
 )
 
 

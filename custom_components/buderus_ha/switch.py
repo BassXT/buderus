@@ -38,6 +38,13 @@ SWITCH_DESCRIPTIONS: tuple[BuderusSwitchEntityDescription, ...] = (
         off_value="off",
         entity_category=EntityCategory.CONFIG,
     ),
+    BuderusSwitchEntityDescription(
+        key="heating_circuit_boost",
+        name="Heating circuit boost",
+        resource_path="/heatingCircuits/hc1/boostMode",
+        on_value="on",
+        off_value="off",
+    ),
 )
 
 
