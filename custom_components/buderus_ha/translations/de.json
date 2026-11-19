@@ -81,11 +81,13 @@
       "emon_total_environmental_energy": { "name": "Umweltenergie gesamt" }
     },
     "number": {
+      "heating_circuit_max_flow_temp": { "name": "Heizkreis max. Vorlauftemperatur" },
       "heating_circuit_manual_room_setpoint": { "name": "Heizkreis manueller Raumsollwert" },
       "dhw_charge_duration": { "name": "Extra-Warmwasser Dauer" },
       "dhw_single_charge_setpoint": { "name": "Extra-Warmwasser Solltemperatur" }
     },
     "select": {
+      "heating_circuit_control_type": { "name": "Heizkreis Regelungsart", "state": { "wdcoptimized": "Witterungsgeführt (optimiert)", "wdcsimplified": "Witterungsgeführt (einfach)" } },
       "dhw_operation_mode": { "name": "Warmwasser Betriebsart", "state": { "eco": "Eco+", "high": "Komfort", "low": "Eco", "off": "Aus", "ownprogram": "Auto" } }
     },
     "switch": {

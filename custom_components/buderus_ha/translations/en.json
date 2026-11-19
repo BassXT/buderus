@@ -81,11 +81,13 @@
       "emon_total_environmental_energy": { "name": "Total environmental energy" }
     },
     "number": {
+      "heating_circuit_max_flow_temp": { "name": "Heating circuit max flow temperature" },
       "heating_circuit_manual_room_setpoint": { "name": "Heating circuit manual room setpoint" },
       "dhw_charge_duration": { "name": "Extra hot water duration" },
       "dhw_single_charge_setpoint": { "name": "Extra hot water target temperature" }
     },
     "select": {
+      "heating_circuit_control_type": { "name": "Heating circuit control type", "state": { "wdcoptimized": "Weather-compensated (optimized)", "wdcsimplified": "Weather-compensated (simple)" } },
       "dhw_operation_mode": { "name": "DHW operation mode", "state": { "eco": "Eco+", "high": "Comfort", "low": "Eco", "off": "Off", "ownprogram": "Auto" } }
     },
     "switch": {

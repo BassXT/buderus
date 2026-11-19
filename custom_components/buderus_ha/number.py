@@ -54,6 +54,23 @@ NUMBER_DESCRIPTIONS: tuple[BuderusNumberEntityDescription, ...] = (
         mode=NumberMode.SLIDER,
         entity_category=EntityCategory.CONFIG,
     ),
+    # `/heatingCircuits/hc1/maxFlowTemp` — the cap the curve may not exceed. The gateway declares it
+    # `writeable=1` and the range comes from the resource itself (`minValue`/`maxValue`), never from this file: a
+    # heat pump's own limits are the only ones worth enforcing. Added 2026-11-13 because the cap turned out to be
+    # the *binding* limit on this installation (flow stood at 50,9 °C with the cap at 50,0 °C at 0,2 °C outside),
+    # and because a value written from Home Assistant lands in the recorder as a state change — which makes a
+    # setting change a timed phase boundary instead of a sentence in a log.
+    BuderusNumberEntityDescription(
+        key="heating_circuit_max_flow_temp",
+        translation_key="heating_circuit_max_flow_temp",
+        resource_path="/heatingCircuits/hc1/maxFlowTemp",
+        native_min_value=30,
+        native_max_value=60,
+        native_step=0.5,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        mode=NumberMode.BOX,
+        entity_category=EntityCategory.CONFIG,
+    ),
     BuderusNumberEntityDescription(
         key="heating_circuit_boost_duration",
         name="Heating circuit boost duration",

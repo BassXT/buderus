@@ -6,6 +6,7 @@ from typing import Any
 from homeassistant.components.select import SelectEntity, SelectEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -34,6 +35,21 @@ SELECT_DESCRIPTIONS: tuple[BuderusSelectEntityDescription, ...] = (
             "high": "high",
             "ownprogram": "ownprogram",
         },
+    ),
+    # `/heatingCircuits/hc1/controlType` — `wdcoptimized` (weather-compensated, room influence possible) versus
+    # `wdcsimplified` (the plain curve). Both values are the gateway's own (`options` on the sensor carries them);
+    # nothing here invents a third. Added 2026-11-13: this is the switch to test next, and walking to the panel for
+    # a two-valued setting is what makes a test plan slip.
+    BuderusSelectEntityDescription(
+        key="heating_circuit_control_type",
+        translation_key="heating_circuit_control_type",
+        resource_path="/heatingCircuits/hc1/controlType",
+        options=("wdcoptimized", "wdcsimplified"),
+        option_to_value={
+            "wdcoptimized": "wdcoptimized",
+            "wdcsimplified": "wdcsimplified",
+        },
+        entity_category=EntityCategory.CONFIG,
     ),
     BuderusSelectEntityDescription(
         key="heating_circuit_operation_mode",
