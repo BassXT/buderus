@@ -36,6 +36,7 @@ RESOURCE_PATHS: tuple[str, ...] = (
     "/heatingCircuits/hc1/maxFlowTemp",
     "/heatingCircuits/hc1/overallStatus",
     "/heatingCircuits/hc1/roomtemperature",
+    "/heatingCircuits/hc1/actualHumidity",
     "/heatingCircuits/hc1/suWiSwitchMode",
     "/heatingCircuits/hc1/suWiThreshold",
     "/heatingCircuits/hc1/switchProgramMode",

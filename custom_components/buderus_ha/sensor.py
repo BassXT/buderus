@@ -11,7 +11,12 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfEnergy, UnitOfTemperature, UnitOfTime
+from homeassistant.const import (
+    PERCENTAGE,
+    UnitOfEnergy,
+    UnitOfTemperature,
+    UnitOfTime,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -148,6 +153,14 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         resource_path="/heatingCircuits/hc1/roomtemperature",
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
+    BuderusSensorEntityDescription(
+        key="heating_circuit_room_humidity",
+        name="Heating circuit room humidity",
+        resource_path="/heatingCircuits/hc1/actualHumidity",
+        device_class=SensorDeviceClass.HUMIDITY,
+        native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     BuderusSensorEntityDescription(
