@@ -17,7 +17,7 @@ class BuderusApiError(Exception):
 class BuderusAuthError(BuderusApiError):
     """Raised when the current access token is rejected."""
 
-    def __init__(self, message: str, status: int) -> None:
+    def __init__(self, message: str, status: int | None = None) -> None:
         super().__init__(message)
         self.status = status
 
