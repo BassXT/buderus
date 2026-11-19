@@ -103,6 +103,7 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
             "summer_idle",
             "heating_auto",
             "heating_manual_off",
+            "heating_manual_on",
         ],
     ),
     BuderusSensorEntityDescription(
@@ -210,6 +211,10 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
             "auto",
             "manual_on_eco",
             "manual_on_high",
+            "td",
+            "extra",
+            "manual_off",
+            "manual_on_low",
         ],
     ),
     BuderusSensorEntityDescription(
