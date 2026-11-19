@@ -77,9 +77,9 @@ RESOURCE_PATHS: tuple[str, ...] = (
     # Found by crawling /heatSources, /dhwCircuits, /heatingCircuits, /system, /gateway and /zones and by
     # probing 489 candidate paths from the community k40rf-bridge resource list against an MX300 gateway
     # (`/gateway/versionHardware` reports `K30RF_v1`, firmware 15.00.01): 97 leaves answer 200, and these
-    # are the ones without an entity. A container can be forbidden while its leaves
-    # are readable — `/heatSources/compressor` answers 403, `/heatSources/compressor/powerElecActual` does
-    # not — so crawling the containers alone does not find them.
+    # are the ones without an entity. A container can be forbidden while its leaves are readable —
+    # `/heatSources/compressor` answers 403, `/heatSources/compressor/powerElecActual` does not — so
+    # crawling the containers alone does not find them.
     "/heatSources/compressor/powerElecActual",
     "/heatSources/eHeater/powerElecActual",
     "/heatSources/hs1/refrigerant/status",

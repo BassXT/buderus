@@ -117,7 +117,7 @@ class BuderusSelect(CoordinatorEntity[BuderusDataUpdateCoordinator], SelectEntit
         resource = self._resource or {}
         allowed = resource.get("allowedValues")
         if isinstance(allowed, list) and allowed:
-            return [str(value) for value in allowed]
+            return [self._option_for(value) for value in allowed]
         return list(self.entity_description.options)
 
     @property
@@ -134,17 +134,42 @@ class BuderusSelect(CoordinatorEntity[BuderusDataUpdateCoordinator], SelectEntit
         return option if option in self.entity_description.options else None
 
     async def async_select_option(self, option: str) -> None:
-        if option not in self.entity_description.option_to_value:
+        api_value = self.entity_description.option_to_value.get(option)
+        if api_value is None:
+            api_value = self._api_value_for(option)
+        if api_value is None:
             raise ValueError(f"Unsupported option: {option}")
 
         resource = self._resource or {}
         await self.coordinator.client.set_resource_value(
             self.coordinator.gateway_id,
             self.entity_description.resource_path,
-            self.entity_description.option_to_value[option],
+            api_value,
             resource_type=resource.get("type"),
         )
         await self.coordinator.async_request_refresh()
+
+    def _option_for(self, value: Any) -> str:
+        """@brief Express a resource value in the vocabulary of this description.
+
+        @param value (Any) — one entry of the resource's `allowedValues`.
+        @return (str) — the option name when the description knows the value, otherwise the value itself.
+        """
+        for option, api_value in self.entity_description.option_to_value.items():
+            if str(value).lower() == api_value.lower():
+                return option
+        return str(value)
+
+    def _api_value_for(self, option: str) -> str | None:
+        """@brief Resolve an option name case-insensitively to the value the plant expects.
+
+        @param option (str) — the option Home Assistant asks for.
+        @return (str | None) — the resource value, or None when the description does not know the option.
+        """
+        for name, api_value in self.entity_description.option_to_value.items():
+            if name.lower() == option.lower():
+                return api_value
+        return None
 
     def _value_to_option(self, value: str) -> str:
         for option, api_value in self.entity_description.option_to_value.items():
