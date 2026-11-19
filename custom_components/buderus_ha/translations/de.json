@@ -15,7 +15,8 @@
       "invalid_auth": "SingleKey-Login konnte nicht abgeschlossen werden."
     },
     "abort": {
-      "already_configured": "Dieses Gateway ist bereits eingerichtet."
+      "already_configured": "Dieses Gateway ist bereits eingerichtet.",
+      "reauth_successful": "Die erneute Anmeldung war erfolgreich."
     }
   },
   "entity": {

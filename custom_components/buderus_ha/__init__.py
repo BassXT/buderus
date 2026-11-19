@@ -4,9 +4,10 @@ import time
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .api import BuderusPointTClient
+from .api import BuderusAuthError, BuderusPointTClient
 from .auth import BuderusOAuthClient
 from .const import CONF_ACCESS_TOKEN, CONF_EXPIRES_AT, CONF_GATEWAY_ID, CONF_REFRESH_TOKEN, DOMAIN, PLATFORMS
 from .coordinator import BuderusDataUpdateCoordinator
@@ -20,7 +21,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if time.time() < entry.data.get(CONF_EXPIRES_AT, 0) - 60:
             return entry.data[CONF_ACCESS_TOKEN]
 
-        token_data = await oauth_client.refresh(entry.data[CONF_REFRESH_TOKEN])
+        try:
+            token_data = await oauth_client.refresh(entry.data[CONF_REFRESH_TOKEN])
+        except BuderusAuthError as err:
+            # A refused refresh token cannot be repaired by retrying. Before this, the failure surfaced
+            # as UpdateFailed, so Home Assistant retried the setup forever ("Einrichtungsfehler, wird
+            # erneut versucht: ... invalid_grant") with no way out for the user. ConfigEntryAuthFailed
+            # instead starts the reauthentication flow in config_flow.py.
+            raise ConfigEntryAuthFailed(f"Token refresh failed: {err}") from err
         new_data = {
             **entry.data,
             CONF_ACCESS_TOKEN: token_data[CONF_ACCESS_TOKEN],
