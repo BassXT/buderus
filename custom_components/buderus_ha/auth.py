@@ -50,7 +50,10 @@ def build_authorization_url(code_verifier: str, state: str) -> str:
 
 
 def parse_authorization_response(value: str, expected_state: str | None = None) -> str:
-    value = value.strip()
+    # People paste this out of a browser address bar, a chat window or a log — it arrives with
+    # surrounding quotes, backticks or angle brackets surprisingly often, and a stray quote turns a
+    # perfectly good code into "invalid_auth" with no hint why.
+    value = value.strip().strip("\"'`<>").strip()
     if value.startswith("http") or value.startswith(OAUTH_REDIRECT_URI):
         parsed = urlparse(value)
         params = parse_qs(parsed.query or parsed.fragment)
