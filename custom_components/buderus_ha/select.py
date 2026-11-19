@@ -35,6 +35,17 @@ SELECT_DESCRIPTIONS: tuple[BuderusSelectEntityDescription, ...] = (
             "ownprogram": "ownprogram",
         },
     ),
+    BuderusSelectEntityDescription(
+        key="heating_circuit_operation_mode",
+        name="Heating circuit operation mode",
+        resource_path="/heatingCircuits/hc1/operationMode",
+        options=("off", "manual", "auto"),
+        option_to_value={
+            "off": "off",
+            "manual": "manual",
+            "auto": "auto",
+        },
+    ),
 )
 
 
