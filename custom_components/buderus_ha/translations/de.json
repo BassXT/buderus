@@ -3,9 +3,9 @@
     "step": {
       "user": {
         "title": "Buderus MX300",
-        "description": "Die Ersteinrichtung funktioniert aktuell nur zuverlässig in einem Desktop-Browser. Auf iPhone oder Android kann die installierte MyBuderus-App den finalen App-Redirect abfangen.\n\n1. Öffne vor dem Login die Browser-Entwicklertools mit F12.\n2. Wechsle zum Tab Netzwerk und aktiviere Protokoll beibehalten.\n3. Öffne die SingleKey-Login-URL unten und melde dich an.\n4. Nach dem Login kann eine Netzwerk- oder Weiterleitungsfehlermeldung erscheinen. Das ist erwartbar.\n5. Suche im Netzwerk-Tab den letzten Eintrag `/auth/connect/authorize/callback`.\n6. Kopiere aus den Antwort-Headern den `Location` Header. Die URL beginnt mit `com.buderus.tt.dashtt://app/login`.\n7. Füge diese URL hier ein.\n\n{authorization_url}",
+        "description": "### Einmalige Anmeldung\n\n1. [SingleKey-Anmeldung öffnen]({authorization_url}) und mit dem Bosch-Konto anmelden.\n2. Der Browser versucht danach, `com.buderus.tt.dashtt://app/login?code=…` zu öffnen, und scheitert. Das ist erwartet: die Weiterleitung gehört zur MyBuderus-App, nicht zu Home Assistant.\n3. Diese Adresse kopieren — die vollständige `com.buderus.tt.dashtt://…`-URL oder nur den `code=`-Wert — und unten einfügen.\n\nZeigt der Browser die gescheiterte Adresse nicht an (Safari versteckt sie), stattdessen die Entwicklerwerkzeuge nehmen: vor der Anmeldung mit F12 öffnen, im Netzwerk-Tab \"Preserve log\" einschalten und den `Location`-Header der letzten `/auth/connect/authorize/callback`-Anfrage kopieren.\n\n{authorization_url}",
         "data": {
-          "redirect_url": "Redirect-URL aus dem Location-Header oder Autorisierungscode",
+          "redirect_url": "Weiterleitungs-URL oder Autorisierungscode",
           "gateway_id": "Gateway-ID"
         }
       }
@@ -15,7 +15,8 @@
       "invalid_auth": "SingleKey-Login konnte nicht abgeschlossen werden."
     },
     "abort": {
-      "already_configured": "Dieses Gateway ist bereits eingerichtet."
+      "already_configured": "Dieses Gateway ist bereits eingerichtet.",
+      "reauth_successful": "Die erneute Anmeldung war erfolgreich."
     }
   },
   "entity": {

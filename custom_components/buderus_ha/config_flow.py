@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 import logging
 from typing import Any
 
@@ -64,6 +65,21 @@ class BuderusConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     _authorization_url: str
     _code_verifier: str
     _state: str
+    _reauth_entry: config_entries.ConfigEntry | None = None
+
+    async def async_step_reauth(
+        self,
+        entry_data: Mapping[str, Any],
+    ) -> config_entries.ConfigFlowResult:
+        """Re-authenticate an existing entry whose refresh token no longer works.
+
+        Home Assistant enters this step when the integration raises ConfigEntryAuthFailed, i.e. when the
+        provider refuses the stored refresh token (observed: 400 invalid_grant after a refresh whose
+        result could not be persisted). The user step is reused on purpose — the SingleKey dance is
+        identical — which also keeps this patch out of the step translations.
+        """
+        self._reauth_entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
+        return await self.async_step_user()
 
     def _ensure_authorization_context(self) -> None:
         if hasattr(self, "_authorization_url"):
@@ -94,17 +110,21 @@ class BuderusConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.warning("Buderus gateway validation failed during setup: %s", err)
                 errors["base"] = "cannot_connect"
             else:
+                data = {
+                    CONF_ACCESS_TOKEN: token_data[CONF_ACCESS_TOKEN],
+                    CONF_REFRESH_TOKEN: token_data[CONF_REFRESH_TOKEN],
+                    CONF_EXPIRES_AT: token_data.get(CONF_EXPIRES_AT, 0),
+                    CONF_GATEWAY_ID: info["gateway_id"],
+                }
+                if self._reauth_entry is not None:
+                    # Re-authentication: keep the entry — and with it every entity, its id and its
+                    # statistics — and only replace the tokens. No unique_id check: the entry being
+                    # repaired already owns that id, so _abort_if_unique_id_configured() would fire.
+                    self.hass.config_entries.async_update_entry(self._reauth_entry, data=data)
+                    return self.async_abort(reason="reauth_successful")
                 await self.async_set_unique_id(info["gateway_id"])
                 self._abort_if_unique_id_configured()
-                return self.async_create_entry(
-                    title=info["title"],
-                    data={
-                        CONF_ACCESS_TOKEN: token_data[CONF_ACCESS_TOKEN],
-                        CONF_REFRESH_TOKEN: token_data[CONF_REFRESH_TOKEN],
-                        CONF_EXPIRES_AT: token_data.get(CONF_EXPIRES_AT, 0),
-                        CONF_GATEWAY_ID: info["gateway_id"],
-                    },
-                )
+                return self.async_create_entry(title=info["title"], data=data)
 
         return self.async_show_form(
             step_id="user",
