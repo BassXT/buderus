@@ -58,6 +58,7 @@ RESOURCE_PATHS: tuple[str, ...] = (
     "/heatSources/chStatus",
     "/heatSources/compressor/status",
     "/heatSources/actualSupplyTemperature",
+    "/heatSources/systemPressure",
     "/heatSources/returnTemperature",
     "/heatSources/numberOfStarts",
     "/heatSources/hs1/heatPumpType",

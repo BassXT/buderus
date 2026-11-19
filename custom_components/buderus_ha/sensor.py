@@ -14,6 +14,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     PERCENTAGE,
     UnitOfEnergy,
+    UnitOfPressure,
     UnitOfTemperature,
     UnitOfTime,
 )
@@ -162,6 +163,17 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         device_class=SensorDeviceClass.HUMIDITY,
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
+    ),
+    # The heat-source pressure: how a heat pump fails quietly — the loop loses water, the pressure falls, and
+    # the plant warns instead of heating.
+    BuderusSensorEntityDescription(
+        key="heat_source_system_pressure",
+        name="Heat source system pressure",
+        resource_path="/heatSources/systemPressure",
+        device_class=SensorDeviceClass.PRESSURE,
+        native_unit_of_measurement=UnitOfPressure.BAR,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
     ),
     BuderusSensorEntityDescription(
         key="heating_circuit_max_flow_temperature",
