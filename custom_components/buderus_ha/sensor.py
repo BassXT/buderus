@@ -586,6 +586,120 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         icon="mdi:leaf",
         **ENERGY_KWH,
     ),
+
+)
+
+
+# ---- the rest of what the gateway serves ------------------------------------------------------------
+# Same source as `coordinator.RESOURCE_PATHS`: 97 leaves answer 200 on this gateway, 48 of them already had an
+# entity, and these are the remaining scalars. Written as a table, one line per scalar, because nine lines of
+# keyword arguments per description would bury the list.
+#
+# `state_class` is **derived, not declared**: `MEASUREMENT` only where the value is a number with a unit and
+# not an enum. A `state_class` on a string resource makes Home Assistant cast the state to float and refuse
+# the entity outright — measured, `gateway/versionFirmware` ("15.00.01") failed to add with
+# `ValueError: could not convert string to float`, and because `async_add_entities` takes a generator, that
+# one refusal silently dropped every entity after it in the table.
+#
+# `options` for the ENUM sensors come from each resource's own `allowedValues`, in the **slug form the
+# integration's `enum_slug` produces** (`notConnected` -> `not_connected`). A guessed list logs every value as
+# undeclared — which is how `alarm` stayed invisible until a sensor for it existed.
+#
+# Deliberately **not** here, because no entity can honestly show them: `gateway/thirdPartyLicenseInformation`
+# and `zones/configuration` (kilobyte blobs), `wifi/ssid` and `zones/list` (lists), the base64 `name` fields,
+# `hc1/switchPrograms/A` (answers null here) and `variableTariff/supportStatus` (a constant).
+_EXTRA_SENSORS: tuple[tuple[str, str, Any, Any, str, tuple[str, ...], str], ...] = (
+    # (key, resource path, unit, device_class, icon, options, kind)
+    ("compressor_power_electrical", "/heatSources/compressor/powerElecActual",
+     "W", SensorDeviceClass.POWER, "mdi:flash", (), "meas"),
+    ("eheater_power_electrical", "/heatSources/eHeater/powerElecActual",
+     "W", SensorDeviceClass.POWER, "mdi:radiator", (), "meas"),
+    ("compressor_mode", "/heatSources/hs1/refrigerant/status",
+     None, SensorDeviceClass.ENUM, "mdi:heat-pump", ("off", "heating", "cooling", "dhw", "pool", "pool_heat", "defrost", "alarm"), "enum"),
+    ("compressor_speed", "/heatSources/hs1/refrigerant/compressorActualSpeed",
+     "%", None, "mdi:speedometer", (), "meas"),
+    ("dhw_charge_remaining", "/dhwCircuits/dhw1/chargeRemainingTime",
+     "min", SensorDeviceClass.DURATION, "mdi:timer-sand", (), "meas"),
+    ("hc1_boost_remaining", "/heatingCircuits/hc1/boostRemainingTime",
+     "min", SensorDeviceClass.DURATION, "mdi:timer-sand", (), "meas"),
+    ("dhw_temperature_level", "/dhwCircuits/dhw1/currentTemperatureLevel",
+     None, SensorDeviceClass.ENUM, "mdi:water-boiler", ("off", "low", "high", "eco"), "enum"),
+    ("dhw_level_eco", "/dhwCircuits/dhw1/temperatureLevels/eco",
+     "\u00b0C", SensorDeviceClass.TEMPERATURE, "mdi:water-boiler", (), "meas"),
+    ("dhw_level_low", "/dhwCircuits/dhw1/temperatureLevels/low",
+     "\u00b0C", SensorDeviceClass.TEMPERATURE, "mdi:water-boiler", (), "meas"),
+    ("dhw_level_high", "/dhwCircuits/dhw1/temperatureLevels/high",
+     "\u00b0C", SensorDeviceClass.TEMPERATURE, "mdi:water-boiler", (), "meas"),
+    ("hc1_level_comfort2", "/heatingCircuits/hc1/temperatureLevels/comfort2",
+     "\u00b0C", SensorDeviceClass.TEMPERATURE, "mdi:home-thermometer", (), "meas"),
+    ("hc1_level_eco", "/heatingCircuits/hc1/temperatureLevels/eco",
+     "\u00b0C", SensorDeviceClass.TEMPERATURE, "mdi:home-thermometer", (), "meas"),
+    ("hc1_suwi_cooling_threshold", "/heatingCircuits/hc1/suWiCoolingThreshold",
+     "\u00b0C", SensorDeviceClass.TEMPERATURE, "mdi:sun-snowflake", (), "meas"),
+    ("additional_heater_flow", "/heatSources/additionalHeater/flowTemp",
+     "\u00b0C", SensorDeviceClass.TEMPERATURE, "mdi:thermometer", (), "meas"),
+    ("flame_status", "/heatSources/flameStatus",
+     None, SensorDeviceClass.ENUM, "mdi:fire", ("off", "on"), "enum"),
+    ("pv_contact_state", "/heatSources/pvContactState",
+     None, SensorDeviceClass.ENUM, "mdi:solar-power", ("off", "on"), "enum"),
+    ("energy_manager_state", "/heatSources/emStatus",
+     None, SensorDeviceClass.ENUM, "mdi:home-battery", ("not_connected", "inactive", "active_ch", "active_dhw"), "enum"),
+    ("away_mode", "/system/awayMode/enabled",
+     None, SensorDeviceClass.ENUM, "mdi:bag-suitcase", ("on", "off"), "enum"),
+    ("gateway_firmware", "/gateway/versionFirmware",
+     None, None, "mdi:chip", (), "text"),
+    ("gateway_hardware", "/gateway/versionHardware",
+     None, None, "mdi:chip", (), "text"),
+    ("gateway_brand", "/gateway/brand",
+     None, None, "mdi:chip", (), "text"),
+    ("gateway_sw_prefix", "/gateway/swPrefix",
+     None, None, "mdi:chip", (), "text"),
+    ("gateway_ip", "/gateway/wifi/ip/ipv4",
+     None, None, "mdi:ip-network", (), "text"),
+)
+
+# The per-mode runtime counters arrive as `emonValue` dictionaries in **seconds**; hours are what a reader
+# wants, so they reuse `value_kind="emon_value"` with a `value_scale`.
+_EXTRA_COUNTERS: tuple[tuple[str, str], ...] = (
+    # (key, key inside the emonValue dictionary)
+    ("working_time_heating", "ch"),
+    ("working_time_dhw", "dhw"),
+    ("working_time_cooling", "cooling"),
+    ("working_time_total", "total"),
+)
+
+SENSOR_DESCRIPTIONS += tuple(
+    BuderusSensorEntityDescription(
+        key=key,
+        translation_key=key,
+        resource_path=path,
+        native_unit_of_measurement=unit,
+        device_class=device_class,
+        state_class=(
+            SensorStateClass.MEASUREMENT
+            if kind == "meas" and unit and device_class != SensorDeviceClass.ENUM
+            else None
+        ),
+        icon=icon,
+        options=options or None,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    )
+    for key, path, unit, device_class, icon, options, kind in _EXTRA_SENSORS
+) + tuple(
+    BuderusSensorEntityDescription(
+        key=key,
+        translation_key=key,
+        resource_path="/heatSources/hs1/workingTime",
+        value_key=value_key,
+        value_kind="emon_value",
+        value_scale=1 / 3600,
+        native_unit_of_measurement=UnitOfTime.HOURS,
+        device_class=SensorDeviceClass.DURATION,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        icon="mdi:clock-outline",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    )
+    for key, value_key in _EXTRA_COUNTERS
 )
 
 
@@ -642,7 +756,13 @@ class BuderusSensor(CoordinatorEntity[BuderusDataUpdateCoordinator], SensorEntit
             return None
 
         if self.entity_description.value_kind == "emon_value":
-            return emon_value(resource, self.entity_description.value_key)
+            # The scale exists because the unit a resource reports in and the unit an entity shows need not be
+            # the same: the per-mode counters arrive in seconds and are shown in hours. The default 1.0 keeps
+            # every emon sensor that does not set it byte-for-byte identical.
+            value = emon_value(resource, self.entity_description.value_key)
+            if value is None:
+                return None
+            return value * self.entity_description.value_scale
 
         if self.entity_description.value_kind == "emon_total_electricity":
             return total_electricity(resource)

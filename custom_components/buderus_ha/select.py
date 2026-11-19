@@ -36,18 +36,24 @@ SELECT_DESCRIPTIONS: tuple[BuderusSelectEntityDescription, ...] = (
             "ownprogram": "ownprogram",
         },
     ),
-    # `/heatingCircuits/hc1/controlType` — `wdcoptimized` (weather-compensated, room influence possible) versus
-    # `wdcsimplified` (the plain curve). Both values are the gateway's own (`options` on the sensor carries them);
-    # nothing here invents a third. Added 2026-11-13: this is the switch to test next, and walking to the panel for
-    # a two-valued setting is what makes a test plan slip.
+    # `/heatingCircuits/hc1/controlType` — how the flow temperature is derived: `wdcoptimized` (weather-
+    # compensated, with room influence), `wdcsimplified` (the plain curve), `ISRC` (room-led) and `vbh`.
+    #
+    # The resource reports `allowedValues: ["wdcoptimized", "wdcsimplified", "ISRC", "vbh"]`; the panel
+    # offers three of them and calls them `Außentemperatur geführt`, `Außentemperatur mit Fußpunkt` and
+    # `Einzelraumgeführt`. The tuple below is only the fallback for a gateway that sends no `allowedValues`;
+    # `BuderusSelect.options` prefers the resource's own list, so a plant with a different set is not silently
+    # mis-offered.
     BuderusSelectEntityDescription(
         key="heating_circuit_control_type",
         translation_key="heating_circuit_control_type",
         resource_path="/heatingCircuits/hc1/controlType",
-        options=("wdcoptimized", "wdcsimplified"),
+        options=("wdcoptimized", "wdcsimplified", "ISRC", "vbh"),
         option_to_value={
             "wdcoptimized": "wdcoptimized",
             "wdcsimplified": "wdcsimplified",
+            "ISRC": "ISRC",
+            "vbh": "vbh",
         },
         entity_category=EntityCategory.CONFIG,
     ),
@@ -101,6 +107,17 @@ class BuderusSelect(CoordinatorEntity[BuderusDataUpdateCoordinator], SelectEntit
 
     @property
     def options(self) -> list[str]:
+        """The choices the **resource** declares, not the ones this file guessed.
+
+        @return (list[str]) — `allowedValues` of the resource when the gateway sends them, otherwise the hard-coded
+            tuple from the description. Measured: `hc1/controlType` allows four values
+            (`wdcoptimized`, `wdcsimplified`, `ISRC`, `vbh`) and this integration offered two — a capability hidden
+            from the user, the same defect class as a writable resource that only has a sensor.
+        """
+        resource = self._resource or {}
+        allowed = resource.get("allowedValues")
+        if isinstance(allowed, list) and allowed:
+            return [str(value) for value in allowed]
         return list(self.entity_description.options)
 
     @property

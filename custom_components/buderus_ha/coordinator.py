@@ -73,6 +73,39 @@ RESOURCE_PATHS: tuple[str, ...] = (
     "/system/globalSeasonOptimizer/currentMode",
     "/system/iSRC/supportStatus",
     "/notifications",
+    # ---- every remaining readable resource this gateway serves ------------------------------------
+    # Found by crawling /heatSources, /dhwCircuits, /heatingCircuits, /system, /gateway and /zones and by
+    # probing 489 candidate paths from the community k40rf-bridge resource list against an MX300 gateway
+    # (`/gateway/versionHardware` reports `K30RF_v1`, firmware 15.00.01): 97 leaves answer 200, and these
+    # are the ones without an entity. A container can be forbidden while its leaves
+    # are readable — `/heatSources/compressor` answers 403, `/heatSources/compressor/powerElecActual` does
+    # not — so crawling the containers alone does not find them.
+    "/heatSources/compressor/powerElecActual",
+    "/heatSources/eHeater/powerElecActual",
+    "/heatSources/hs1/refrigerant/status",
+    "/heatSources/hs1/refrigerant/compressorActualSpeed",
+    "/heatSources/hs1/workingTime",
+    "/heatSources/systemPressureRange",
+    "/heatSources/additionalHeater/flowTemp",
+    "/heatSources/flameStatus",
+    "/heatSources/pvContactState",
+    "/heatSources/emStatus",
+    "/dhwCircuits/dhw1/chargeRemainingTime",
+    "/dhwCircuits/dhw1/currentTemperatureLevel",
+    "/dhwCircuits/dhw1/temperatureLevels/eco",
+    "/dhwCircuits/dhw1/temperatureLevels/low",
+    "/dhwCircuits/dhw1/temperatureLevels/high",
+    "/dhwCircuits/dhw1/temperatureLevels/off",
+    "/heatingCircuits/hc1/boostRemainingTime",
+    "/heatingCircuits/hc1/suWiCoolingThreshold",
+    "/heatingCircuits/hc1/temperatureLevels/comfort2",
+    "/heatingCircuits/hc1/temperatureLevels/eco",
+    "/system/awayMode/enabled",
+    "/gateway/versionFirmware",
+    "/gateway/versionHardware",
+    "/gateway/brand",
+    "/gateway/swPrefix",
+    "/gateway/wifi/ip/ipv4",
 )
 
 

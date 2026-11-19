@@ -55,10 +55,10 @@ NUMBER_DESCRIPTIONS: tuple[BuderusNumberEntityDescription, ...] = (
         entity_category=EntityCategory.CONFIG,
     ),
     # `/heatingCircuits/hc1/maxFlowTemp` — the cap the curve may not exceed. The gateway declares it
-    # `writeable=1` and the range comes from the resource itself (`minValue`/`maxValue`), never from this file: a
-    # heat pump's own limits are the only ones worth enforcing. Added 2026-11-13 because the cap turned out to be
-    # the *binding* limit on this installation (flow stood at 50,9 °C with the cap at 50,0 °C at 0,2 °C outside),
-    # and because a value written from Home Assistant lands in the recorder as a state change — which makes a
+    # `writeable=1` and the range comes from the resource itself (`minValue`/`maxValue`), never from this file:
+    # the plant's own limits are the only ones worth enforcing. Worth exposing because the cap is often the
+    # *binding* limit rather than the curve — the flow sits at the cap while the rooms are still cold — and
+    # because a value written from Home Assistant lands in the recorder as a state change, which makes a
     # setting change a timed phase boundary instead of a sentence in a log.
     BuderusNumberEntityDescription(
         key="heating_circuit_max_flow_temp",
@@ -79,6 +79,60 @@ NUMBER_DESCRIPTIONS: tuple[BuderusNumberEntityDescription, ...] = (
         native_max_value=8,
         native_step=1,
         native_unit_of_measurement=UnitOfTime.HOURS,
+        mode=NumberMode.BOX,
+        entity_category=EntityCategory.CONFIG,
+    ),
+    # ---- the four temperature levels --------------------------------------------------------------
+    # **These are the *start* temperatures of a charge, not the target.** The cloud splits a charging level in
+    # two: `temperatureLevels/{eco,low,high}` says where charging *begins*, and `{eco,low,high}Stop` — 403, not
+    # readable — says where it ends. `currentSetpoint` reports the stop value, which is why the two differ:
+    # measured, `high` gives `temperatureLevels/high` 53 °C against `currentSetpoint` 60 °C, `low` 51 against
+    # 58, `eco` 44 against 53. The difference *is* the charge delta (`…ChargingDelta`, also 403), so comparing
+    # the two is the only way to observe it.
+    #
+    # Consequence for a reader: raising one of these moves *when* the plant starts charging, not how hot it
+    # gets. Ranges come from the resource itself (`minValue`/`maxValue`), never from this file.
+    BuderusNumberEntityDescription(
+        key="dhw_level_eco_temperature",
+        translation_key="dhw_level_eco_temperature",
+        resource_path="/dhwCircuits/dhw1/temperatureLevels/eco",
+        native_min_value=30,
+        native_max_value=70,
+        native_step=0.5,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        mode=NumberMode.BOX,
+        entity_category=EntityCategory.CONFIG,
+    ),
+    BuderusNumberEntityDescription(
+        key="dhw_level_low_temperature",
+        translation_key="dhw_level_low_temperature",
+        resource_path="/dhwCircuits/dhw1/temperatureLevels/low",
+        native_min_value=30,
+        native_max_value=70,
+        native_step=0.5,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        mode=NumberMode.BOX,
+        entity_category=EntityCategory.CONFIG,
+    ),
+    BuderusNumberEntityDescription(
+        key="dhw_level_comfort_temperature",
+        translation_key="dhw_level_comfort_temperature",
+        resource_path="/dhwCircuits/dhw1/temperatureLevels/high",
+        native_min_value=30,
+        native_max_value=70,
+        native_step=0.5,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        mode=NumberMode.BOX,
+        entity_category=EntityCategory.CONFIG,
+    ),
+    BuderusNumberEntityDescription(
+        key="heating_circuit_comfort_level",
+        translation_key="heating_circuit_comfort_level",
+        resource_path="/heatingCircuits/hc1/temperatureLevels/comfort2",
+        native_min_value=18,
+        native_max_value=30,
+        native_step=0.5,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         mode=NumberMode.BOX,
         entity_category=EntityCategory.CONFIG,
     ),
