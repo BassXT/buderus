@@ -99,7 +99,10 @@ class BuderusOAuthClient:
         async with self._session.post(OAUTH_TOKEN_URL, data=data, headers=headers) as response:
             body = await response.text()
             if response.status in (400, 401, 403):
-                raise BuderusAuthError(f"Token request failed: {response.status} {body}")
+                raise BuderusAuthError(
+                    f"Token request failed: {response.status} {body}",
+                    response.status,
+                )
             if response.status >= 400:
                 raise BuderusApiError(f"Token request failed: {response.status} {body}")
             token_data = await response.json(content_type=None)
