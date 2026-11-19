@@ -60,6 +60,7 @@ RESOURCE_PATHS: tuple[str, ...] = (
     "/heatSources/hs1/heatPumpType",
     "/heatSources/hs1/numberOfStarts",
     "/heatSources/hs1/type",
+    "/heatSources/hs1/supplyFlowCondenserTemp",
     "/heatSources/Source/eHeater/status",
     "/heatSources/workingTime/totalSystem",
     "/system/brand",

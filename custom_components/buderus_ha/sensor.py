@@ -176,6 +176,18 @@ SENSOR_DESCRIPTIONS: tuple[BuderusSensorEntityDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
+    # Condenser-side flow temperature: the only readable value that describes the DHW heat exchange itself.
+    # The water sensors sit behind the 3-way valve on the heating-circuit side, so during a charge they say
+    # nothing about it.
+    BuderusSensorEntityDescription(
+        key="heat_source_condenser_temperature",
+        name="Heat source condenser temperature",
+        resource_path="/heatSources/hs1/supplyFlowCondenserTemp",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+    ),
     BuderusSensorEntityDescription(
         key="dhw_actual_temperature",
         translation_key="dhw_actual_temperature",
